@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Locale } from 'discord.js';
 import MessagePlaceholderHandler, {
     MessagePlaceholderHandlerOptions
 } from './MessagePlaceholderHandler';
@@ -73,6 +74,8 @@ export default class TranslationHandler {
             // Set the default fallback properties based on the system's default locale
             if (this.translations['en-us']) {
                 this.fallback = this.translations['en-us'];
+            } else if (this.translations['en-gb']) {
+                this.fallback = this.translations['en-gb'];
             }
         } catch (error) {
             console.error('Error loading translations from folder:', error);
@@ -124,10 +127,6 @@ export default class TranslationHandler {
     translateTo(langName: string, key: string, ...args: any[]): string {
         const lowerLangName: string = langName.toLowerCase();
 
-        if (!this.translations[lowerLangName]) {
-            return this.translate(key, args);
-        }
-
         const replace: MessagePlaceholderHandlerOptions = {
             ...this.placeholderHandler.getDefaultReplacements()
         };
@@ -136,17 +135,72 @@ export default class TranslationHandler {
             replace[i.toString()] = arg;
         });
 
-        const translation: string = this.translations[lowerLangName]?.[key] || key;
+        // Check if translation for the specified language exists
+        if (this.translations[lowerLangName]) {
+            // Attempt to get the translation for the specified key
+            const translation: string = this.translations[lowerLangName]?.[key];
 
-        // Attempt to resolve nested keys (e.g., en-GB.name)
-        const resolvedTranslation: string = translation.split('.').reduce<string>((obj, part) => {
-            if (obj && typeof obj === 'object' && part in obj) {
-                return obj[part] as unknown as string;
-            } else {
-                return '';
+            if (translation !== undefined) {
+                // Attempt to resolve nested keys (e.g., en-GB.name)
+                const resolvedTranslation: string = translation
+                    .split('.')
+                    .reduce<string>((obj, part) => {
+                        if (obj && typeof obj === 'object' && part in obj) {
+                            return obj[part] as unknown as string;
+                        } else {
+                            return '';
+                        }
+                    }, key);
+
+                return this.placeholderHandler.fastFormat(
+                    resolvedTranslation || translation,
+                    replace
+                );
             }
-        }, key);
+        }
 
-        return this.placeholderHandler.fastFormat(resolvedTranslation || translation, replace);
+        // Fallback to the default language
+        const defaultTranslation: string = this.translate(key, args) || key;
+
+        if (defaultTranslation !== undefined) {
+            return this.placeholderHandler.fastFormat(defaultTranslation, replace);
+        }
+
+        // Fallback to the original key if no translation is found
+        return this.placeholderHandler.fastFormat(key, args);
     }
+
+    /**
+     * Converts the lowercase suffix (including the hyphen) of a given string to uppercase.
+     * If no hyphen is present, the entire string is converted to uppercase.
+     *
+     * @param input - The input string to be processed.
+     * @returns The modified string with the lowercase suffix (including the hyphen) in uppercase.
+     */
+    uppercaseSuffix(input: string): string {
+        // Find the last occurrence of the hyphen in the string
+        const lastIndex = input.lastIndexOf('-');
+
+        if (lastIndex !== -1) {
+            // Separate the string into prefix and suffix
+            const prefix = input.substring(0, lastIndex);
+            const suffix = input.substring(lastIndex).toUpperCase();
+
+            // Combine the prefix and the uppercase suffix
+            return prefix + suffix;
+        } else {
+            // If no hyphen is found, convert the entire string to uppercase
+            return input;
+        }
+    }
+
+    initializeLocales = (): Record<Locale, string | null> => {
+        const locales: Record<Locale, string | null> = {} as Record<Locale, string | null>;
+
+        Object.keys(locales).forEach((locale) => {
+            locales[locale as Locale] = null;
+        });
+
+        return locales;
+    };
 }
