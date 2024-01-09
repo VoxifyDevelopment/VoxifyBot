@@ -21,13 +21,29 @@ export interface MessagePlaceholderHandlerOptions {
     [key: string]: any;
 }
 
+/**
+ * MessagePlaceholderHandler class for handling message placeholders and replacements.
+ * This class provides functionality to format strings with placeholders and replacements.
+ * @class
+ */
 export default class MessagePlaceholderHandler {
     private defaultReplacements: { [key: string]: any };
 
+    /**
+     * Constructor for MessagePlaceholderHandler class.
+     * Initializes an instance with an empty set of default replacements.
+     * @constructor
+     */
     constructor() {
         this.defaultReplacements = {};
     }
 
+    /**
+     * Formats a string with placeholders and replacements.
+     * @param {string} format - The string format with placeholders.
+     * @param {MessagePlaceholderHandlerOptions} values - Optional replacements for placeholders.
+     * @returns {string} - The formatted string with applied replacements.
+     */
     fastFormat(format: string, values?: MessagePlaceholderHandlerOptions): string {
         const replacements = { ...this.getDefaultReplacements(), ...values };
 
@@ -54,16 +70,28 @@ export default class MessagePlaceholderHandler {
         return formatted;
     }
 
+    /**
+     * Adds default replacements to the existing set.
+     * @param {MessagePlaceholderHandlerOptions} additionalReplacements - Additional default replacements.
+     */
     addDefaultReplacements(additionalReplacements: MessagePlaceholderHandlerOptions): void {
         if (additionalReplacements) {
             this.defaultReplacements = { ...this.defaultReplacements, ...additionalReplacements };
         }
     }
 
+    /**
+     * Retrieves a copy of the current default replacements.
+     * @returns {MessagePlaceholderHandlerOptions} - Copy of the current default replacements.
+     */
     getDefaultReplacements(): { [key: string]: any } {
         return { ...this.defaultReplacements };
     }
 
+    /**
+     * Sets the default replacements to a new set of replacements.
+     * @param {MessagePlaceholderHandlerOptions} defaultReplacements - New set of default replacements.
+     */
     setDefaultReplacements(defaultReplacements: MessagePlaceholderHandlerOptions): void {
         this.defaultReplacements = { ...(defaultReplacements || {}) };
     }
