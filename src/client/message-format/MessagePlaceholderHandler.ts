@@ -32,25 +32,26 @@ export default class MessagePlaceholderHandler {
         const replacements = { ...this.getDefaultReplacements(), ...values };
 
         let formatter = format;
-        const valueList: any[] = [];
+        const valueList: string[] = [];
 
-        const pattern = /\$\{(\w+)\}/g;
+        // pattern to allow any characters between ${ and }
+        const pattern = /\$\{([^}]+)\}/g;
         let match = pattern.exec(format);
 
         while (match !== null) {
-            const key = match[1];
-            const formatKey = `\${${key}}`;
-            const index = formatter.indexOf(formatKey);
+            const key = match[0];
+            const index = formatter.indexOf(key);
 
             if (index !== -1) {
-                formatter = formatter.replace(formatKey, '%s');
-                valueList.push(replacements[key]);
+                formatter = formatter.replace(key, '%s');
+                valueList.push(replacements[key.slice(2, -1)]);
             }
 
             match = pattern.exec(format);
         }
 
-        return formatter.replace('%s', (...args) => String(valueList.shift()));
+        const formatted = formatter.replace('%s', (...args) => String(valueList.shift()));
+        return formatted;
     }
 
     addDefaultReplacements(additionalReplacements: MessagePlaceholderHandlerOptions): void {

@@ -113,12 +113,14 @@ export default class TranslationHandler {
     }
 
     translate(key: string, ...args: any[]): string {
-        const replace: MessagePlaceholderHandlerOptions = {
-            ...this.placeholderHandler.getDefaultReplacements()
-        };
+        const replace: MessagePlaceholderHandlerOptions = {};
 
         args.forEach((arg, i) => {
-            replace[i.toString()] = arg;
+            if (typeof arg === 'object') {
+                Object.keys(arg).forEach((k) => {
+                    replace[k] = arg[k];
+                });
+            } else replace[i.toString()] = arg;
         });
 
         return this.placeholderHandler.fastFormat(this.fallback?.[key] || key, replace);
@@ -127,13 +129,17 @@ export default class TranslationHandler {
     translateTo(langName: string, key: string, ...args: any[]): string {
         const lowerLangName: string = langName.toLowerCase();
 
-        const replace: MessagePlaceholderHandlerOptions = {
-            ...this.placeholderHandler.getDefaultReplacements()
-        };
+        const replace: MessagePlaceholderHandlerOptions = {};
 
         args.forEach((arg, i) => {
-            replace[i.toString()] = arg;
+            if (typeof arg === 'object') {
+                Object.keys(arg).forEach((k) => {
+                    replace[k] = arg[k];
+                });
+            } else replace[i.toString()] = arg;
         });
+
+        // console.log(replace);
 
         // Check if translation for the specified language exists
         if (this.translations[lowerLangName]) {
