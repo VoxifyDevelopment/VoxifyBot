@@ -50,8 +50,8 @@ export default class EventManager {
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
             this.bot.slashCommandInteractions
-                .map((c) => c.data)
-                .forEach((data) => this.bot.application?.commands.create(data));
+                .map((c) => c.data(this.bot))
+                .forEach((dataJSON) => this.bot.application?.commands.create(dataJSON));
             this.bot.out.debug(
                 `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
             );
