@@ -48,9 +48,6 @@ export default class PingCommand implements SlashCommandExecutor {
         dataJson.setNameLocalizations(names);
         dataJson.setDescriptionLocalizations(descriptions);
 
-        dataJson.setNameLocalizations(names);
-        dataJson.setDescriptionLocalizations(descriptions);
-
         return dataJson.toJSON();
     };
 
