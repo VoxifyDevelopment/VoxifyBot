@@ -16,6 +16,8 @@
         "build:minify": "find ./dist -type f -name '*.js' -not -path './dist/node_modules/*' -exec bash -c \"uglifyjs --mangle --compress --no-annotations --output {} -- {} && echo minified: {}\" \\;",
         "start": "NODE_ENV=production node .",
         "prettier": "npx prettier --write .",
+        "licenseCheck": "license-check-and-add check -f ./licenseConfig.json",
+        "licenseFormat": "license-check-and-add add -f ./licenseConfig.json",
         "test": "echo \"Error: no test specified\" && exit 0"
     },
     "repository": {
@@ -44,6 +46,7 @@
     },
     "devDependencies": {
         "@types/node": "^20.10.7",
+        "license-check-and-add": "^4.0.5",
         "prettier": "^3.1.1",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3",
