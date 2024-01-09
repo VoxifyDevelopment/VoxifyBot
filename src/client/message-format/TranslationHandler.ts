@@ -62,13 +62,10 @@ export default class TranslationHandler {
                         const relativePath: string = path.relative(languageFolderPath, filePath);
                         const key: string = this.getKeyFromPath(relativePath);
                         const data: string = fs.readFileSync(filePath, 'utf8');
-                        const fileTranslations: { [key: string]: string } = JSON.parse(data);
+                        const fileTranslations: { [key: string]: any } = JSON.parse(data);
 
-                        // Merge translations into the current language object
-                        Object.entries(fileTranslations).forEach(([fileKey, fileValue]) => {
-                            const fullKey: string = key ? `${key}.${fileKey}` : fileKey;
-                            translations[fullKey] = fileValue;
-                        });
+                        // Flatten nested translations into the current language object
+                        this.flattenTranslations(fileTranslations, translations, key);
 
                         if (!this.fallback) {
                             this.fallback = translations;
@@ -89,6 +86,50 @@ export default class TranslationHandler {
             console.error('Error loading translations from folder:', error);
         }
     }
+
+    // loadTranslationsFromFolder(folderPath: string): void {
+    //     try {
+    //         const languageFolders: string[] = fs.readdirSync(folderPath);
+
+    //         languageFolders.forEach((langName: string) => {
+    //             const lowerLangName: string = langName.toLowerCase();
+    //             const languageFolderPath: string = path.join(folderPath, langName);
+    //             const translations: { [key: string]: string } = {};
+
+    //             if (fs.statSync(languageFolderPath).isDirectory()) {
+    //                 const files: string[] = this.readFilesRecursively(languageFolderPath);
+
+    //                 files.forEach((filePath: string) => {
+    //                     const relativePath: string = path.relative(languageFolderPath, filePath);
+    //                     const key: string = this.getKeyFromPath(relativePath);
+    //                     const data: string = fs.readFileSync(filePath, 'utf8');
+    //                     const fileTranslations: { [key: string]: string } = JSON.parse(data);
+
+    //                     // Merge translations into the current language object
+    //                     Object.entries(fileTranslations).forEach(([fileKey, fileValue]) => {
+    //                         const fullKey: string = key ? `${key}.${fileKey}` : fileKey;
+    //                         translations[fullKey] = fileValue;
+    //                     });
+
+    //                     if (!this.fallback) {
+    //                         this.fallback = translations;
+    //                     }
+    //                 });
+
+    //                 this.translations[lowerLangName] = translations;
+    //             }
+    //         });
+
+    //         // Set the default fallback properties based on the system's default locale
+    //         if (this.translations['en-us']) {
+    //             this.fallback = this.translations['en-us'];
+    //         } else if (this.translations['en-gb']) {
+    //             this.fallback = this.translations['en-gb'];
+    //         }
+    //     } catch (error) {
+    //         console.error('Error loading translations from folder:', error);
+    //     }
+    // }
 
     /**
      * Recursively reads all JSON files in a folder and its subfolders.
@@ -245,4 +286,29 @@ export default class TranslationHandler {
 
         return locales;
     };
+
+    /**
+     * Recursively flattens nested translations into the current language object.
+     * @private
+     * @param {object} source - The source object with nested translations.
+     * @param {object} target - The target object to store flattened translations.
+     * @param {string} prefix - The prefix to be added to each flattened translation key.
+     */
+    flattenTranslations(
+        source: { [key: string]: any },
+        target: { [key: string]: string },
+        prefix: string = ''
+    ): void {
+        Object.entries(source).forEach(([key, value]) => {
+            const fullKey: string = prefix ? `${prefix}.${key}` : key;
+
+            if (typeof value === 'object') {
+                // Recursively flatten nested translations
+                this.flattenTranslations(value, target, fullKey);
+            } else {
+                // Add the flattened translation to the target object
+                target[fullKey] = value;
+            }
+        });
+    }
 }
