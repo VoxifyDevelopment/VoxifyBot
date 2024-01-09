@@ -1,0 +1,52 @@
+{
+    "name": "voxify-bot",
+    "version": "1.0.0",
+    "description": "Revolutionize your Discord server with seamless voice channel management. Multilingual support, blazing speed, and advanced features for an unparalleled user experience.",
+    "main": "index.js",
+    "scripts": {
+        "devStart": "NODE_ENV=development tsx watch src/index.ts",
+        "dev": "NODE_ENV=development tsx src/index.ts",
+        "buildClean": "npm run build:clean && npm run build",
+        "build": "npm run build:tsc && npm run build:copy-files && npm run build:install-dependencies",
+        "build:min": "npm run build && npm run build:minify",
+        "build:clean": "rm -rf dist",
+        "build:tsc": "tsc",
+        "build:copy-files": "cp package.json ./dist/package.json && cp package-lock.json ./dist/package-lock.json && cp -n .env.example ./dist/.env",
+        "build:install-dependencies": "npm --prefix ./dist ci",
+        "build:minify": "find ./dist -type f -name '*.js' -not -path './dist/node_modules/*' -exec bash -c \"uglifyjs --mangle --compress --no-annotations --output {} -- {} && echo minified: {}\" \\;",
+        "start": "NODE_ENV=production node .",
+        "prettier": "npx prettier --write .",
+        "test": "echo \"Error: no test specified\" && exit 0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/VoxifyDevelopment/VoxifyBot.git"
+    },
+    "keywords": [
+        "discord",
+        "voice",
+        "bot",
+        "discord-bot",
+        "temp-voice",
+        "voicebot"
+    ],
+    "author": "VoxifyDevelopment <contact@voxify.dev>",
+    "license": "UNLICENSED",
+    "bugs": {
+        "url": "https://github.com/VoxifyDevelopment/VoxifyBot/issues"
+    },
+    "homepage": "https://github.com/VoxifyDevelopment/VoxifyBot#readme",
+    "dependencies": {
+        "discord.js": "^14.14.1",
+        "dotenv": "^16.3.1",
+        "mongoose": "^8.0.3",
+        "redis": "^4.6.12"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.7",
+        "prettier": "^3.1.1",
+        "tsx": "^4.7.0",
+        "typescript": "^5.3.3",
+        "uglify-js": "^3.17.4"
+    }
+}
