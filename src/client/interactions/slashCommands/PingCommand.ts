@@ -60,15 +60,16 @@ export default class PingCommand implements SlashCommandExecutor {
             ? interaction.locale.toLowerCase()
             : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
 
-        const content = bot.translations.translateTo(localeName, 'commands.ping.success');
+        const key = bot.translations.translateTo(localeName, 'commands.ping.name');
         const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+        const content = bot.translations.translateTo(localeName, 'commands.ping.success');
 
         interaction
             .reply({
                 embeds: [
                     await bot.tools.discord.generateEmbed(bot, {
                         type: 'success',
-                        title: 'Ping ' + feedback,
+                        title: `${feedback} /${key}`,
                         content,
                         guild: interaction.guild || undefined,
                         user: interaction.user,
