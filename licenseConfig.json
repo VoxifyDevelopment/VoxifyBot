@@ -1,0 +1,34 @@
+{
+    "ignore": [
+        ".*",
+        "*.json",
+        "*.txt",
+        "*.md",
+        "*.yml",
+        "*.yaml",
+        "**/.*",
+        "**/*.json",
+        "**/*.txt",
+        "**/*.md",
+        "**/*.yml",
+        "**/*.yaml"
+    ],
+    "license": "HEADER.txt",
+    "licenseFormats": {
+        "js": {
+            "prepend": "/**",
+            "append": " */\n",
+            "eachLine": {
+                "prepend": " * "
+            }
+        },
+        "ts": {
+            "prepend": "/**",
+            "append": " */\n",
+            "eachLine": {
+                "prepend": " * "
+            }
+        }
+    },
+    "trailingWhitespace": "TRIM"
+}
