@@ -28,6 +28,6 @@ export interface SlashCommandEvent {
 }
 
 export default interface SlashCommandExecutor extends Executor<SlashCommandEvent> {
-    data: RESTPostAPIChatInputApplicationCommandsJSONBody;
+    data: (bot: VoxifyClient) => RESTPostAPIChatInputApplicationCommandsJSONBody;
     name: string;
 }
