@@ -24,19 +24,27 @@ import MessagePlaceholderHandler, {
 import * as fs from 'fs';
 import * as path from 'path';
 
+/**
+ * TranslationHandler class for managing language translations in a Discord bot.
+ * @class
+ */
 export default class TranslationHandler {
     private placeholderHandler: MessagePlaceholderHandler = new MessagePlaceholderHandler();
     translations: { [langName: string]: { [key: string]: string } } = {};
     private fallback: { [key: string]: string } | undefined;
 
+    /**
+     * Constructor for TranslationHandler class.
+     * @constructor
+     * @param {MessagePlaceholderHandlerOptions} defaultReplacements - Default message placeholder replacements.
+     */
     constructor(defaultReplacements: MessagePlaceholderHandlerOptions) {
         this.placeholderHandler.addDefaultReplacements(defaultReplacements);
     }
 
     /**
      * Load language translations from JSON files in the specified folder and its subfolders.
-     *
-     * @param folderPath The path to the folder containing language JSON files.
+     * @param {string} folderPath - The path to the folder containing language JSON files.
      */
     loadTranslationsFromFolder(folderPath: string): void {
         try {
@@ -82,7 +90,13 @@ export default class TranslationHandler {
         }
     }
 
-    private readFilesRecursively(folderPath: string): string[] {
+    /**
+     * Recursively reads all JSON files in a folder and its subfolders.
+     * @private
+     * @param {string} folderPath - The path to the folder.
+     * @returns {string[]} - Array of file paths.
+     */
+    readFilesRecursively(folderPath: string): string[] {
         const files: string[] = [];
         const entries: fs.Dirent[] = fs.readdirSync(folderPath, { withFileTypes: true });
 
@@ -99,7 +113,13 @@ export default class TranslationHandler {
         return files;
     }
 
-    private getKeyFromPath(filePath: string): string {
+    /**
+     * Extracts a translation key from a file path.
+     * @private
+     * @param {string} filePath - The file path.
+     * @returns {string} - The extracted translation key.
+     */
+    getKeyFromPath(filePath: string): string {
         const parts: string[] = filePath.split(path.sep);
         parts.pop();
 
@@ -112,6 +132,12 @@ export default class TranslationHandler {
         return key;
     }
 
+    /**
+     * Translate a key with optional replacements.
+     * @param {string} key - The translation key.
+     * @param {...any} args - Optional replacements for placeholders in the translation.
+     * @returns {string} - The translated string.
+     */
     translate(key: string, ...args: any[]): string {
         const replace: MessagePlaceholderHandlerOptions = {};
 
@@ -126,6 +152,13 @@ export default class TranslationHandler {
         return this.placeholderHandler.fastFormat(this.fallback?.[key] || key, replace);
     }
 
+    /**
+     * Translate a key to a specific language with optional replacements.
+     * @param {string} langName - The target language name.
+     * @param {string} key - The translation key.
+     * @param {...any} args - Optional replacements for placeholders in the translation.
+     * @returns {string} - The translated string in the specified language.
+     */
     translateTo(langName: string, key: string, ...args: any[]): string {
         const lowerLangName: string = langName.toLowerCase();
 
@@ -179,9 +212,8 @@ export default class TranslationHandler {
     /**
      * Converts the lowercase suffix (including the hyphen) of a given string to uppercase.
      * If no hyphen is present, the entire string is converted to uppercase.
-     *
-     * @param input - The input string to be processed.
-     * @returns The modified string with the lowercase suffix (including the hyphen) in uppercase.
+     * @param {string} input - The input string to be processed.
+     * @returns {string} - The modified string with the lowercase suffix (including the hyphen) in uppercase.
      */
     uppercaseSuffix(input: string): string {
         // Find the last occurrence of the hyphen in the string
@@ -200,6 +232,10 @@ export default class TranslationHandler {
         }
     }
 
+    /**
+     * Initialize locales for language support.
+     * @returns {Record<Locale, string | null>} - Object with initialized locales.
+     */
     initializeLocales = (): Record<Locale, string | null> => {
         const locales: Record<Locale, string | null> = {} as Record<Locale, string | null>;
 

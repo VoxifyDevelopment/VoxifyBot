@@ -65,14 +65,13 @@ export default class PingCommand implements SlashCommandExecutor {
             const namedLanguage = bot.translations.translateTo(lang, 'lang.named');
             languages.push(namedLanguage);
         }
-
         languages.sort((a, b) => a.localeCompare(b, localeName));
 
+        const key = bot.translations.translateTo(localeName, 'commands.languages.name');
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
         const content = bot.translations.translateTo(localeName, 'commands.languages.success', {
             languages: languages.join(', ')
         });
-        const key = bot.translations.translateTo(localeName, 'lang.key');
-        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
 
         interaction
             .reply({
