@@ -21,13 +21,15 @@ import mongoose from 'mongoose';
 
 interface VoxifyGuildSettingsDocument extends mongoose.Document {
     id: string;
-    locale: string;
+    lobby?: string;
+    container?: string;
 }
 
 const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocument>(
     {
         id: { type: String, unique: true, index: true, required: true },
-        locale: { type: String, required: true, default: 'en-us' }
+        lobby: { type: String },
+        container: { type: String }
     },
     { timestamps: true, collection: 'guild_settings' }
 );
@@ -35,5 +37,3 @@ const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocumen
 export const VoxifyGuildSettings =
     mongoose.models.VoxifyGuildSettings ||
     mongoose.model<VoxifyGuildSettingsDocument>('VoxifyGuildSettings', VoxifyGuildSettingsSchema);
-
-export default VoxifyGuildSettings;

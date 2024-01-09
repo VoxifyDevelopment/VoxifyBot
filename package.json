@@ -39,6 +39,7 @@
     },
     "homepage": "https://github.com/VoxifyDevelopment/VoxifyBot#readme",
     "dependencies": {
+        "@types/mongoose": "^5.11.97",
         "discord.js": "^14.14.1",
         "dotenv": "^16.3.1",
         "mongoose": "^8.0.3",
