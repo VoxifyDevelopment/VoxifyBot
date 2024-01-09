@@ -43,9 +43,6 @@ export default class PingCommand implements SlashCommandExecutor {
                 'commands.ping.description'
             );
             descriptions[normalizedLanguage as Locale] = description;
-
-            console.log(normalizedLanguage, 'Name', name);
-            console.log(normalizedLanguage, 'Desc', description);
         });
 
         dataJson.setNameLocalizations(names);
@@ -58,6 +55,30 @@ export default class PingCommand implements SlashCommandExecutor {
     };
 
     async execute(event: SlashCommandEvent) {
+        const { bot, interaction } = event;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
+            ? interaction.locale.toLowerCase()
+            : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
+
+        const content = bot.translations.translateTo(localeName, 'commands.ping.success');
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+
+        interaction
+            .reply({
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        title: 'Ping ' + feedback,
+                        content,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
+            })
+            .catch(console.error);
+
         return true;
     }
 }
