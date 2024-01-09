@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Client, Collection, SlashCommandBuilder } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, SlashCommandBuilder } from 'discord.js';
 
 import * as discord from './tools/discord';
 import * as general from './tools/general';
@@ -26,6 +26,13 @@ import Cache from '../caching/Cache';
 import Database from '../database/Database';
 import TranslationHandler from './message-format/TranslationHandler';
 import path from 'path';
+import * as fs from 'fs';
+import EventManager from './events/EventManager';
+
+import ButtonCommandExecutor from './executors/ButtonCommandExecutor';
+import ModalCommandExecutor from './executors/ModalCommandExecutor';
+import SlashCommandExecutor from './executors/SlashCommandExecutor';
+import UserContextMenuExecutor from './executors/UserContextMenuExecutor';
 
 export default class VoxifyClient extends Client {
     initialized: boolean = false;
@@ -33,19 +40,23 @@ export default class VoxifyClient extends Client {
     db: Database;
     cache: Cache;
     translations: TranslationHandler;
+    shardId: number = 0;
+    cachePrefix: string = '';
 
     tools = { discord, general };
 
-    slashCommandInteractions: Collection<string, any> = new Collection();
-    modalSubmitInteractions: Collection<string, any> = new Collection();
-    buttonCommandInteractions: Collection<string, any> = new Collection();
+    eventManager: EventManager;
+
+    slashCommandInteractions: Collection<string, SlashCommandExecutor> = new Collection();
+    modalSubmitInteractions: Collection<string, ModalCommandExecutor> = new Collection();
+    buttonCommandInteractions: Collection<string, ButtonCommandExecutor> = new Collection();
     autocompleteInteractions: Collection<string, any> = new Collection();
-    userContextInteractions: Collection<string, any> = new Collection();
+    userContextInteractions: Collection<string, UserContextMenuExecutor> = new Collection();
     messageContextInteractions: Collection<string, any> = new Collection();
 
     constructor(database: Database, cache: Cache, shardId?: number) {
         super({
-            intents: [],
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
             partials: []
         });
         this.out = new Logger('VoxifyBot', shardId !== undefined ? `[Shard: ${shardId || 0}]` : '');
@@ -74,6 +85,8 @@ export default class VoxifyClient extends Client {
         this.db = database;
         this.cache = cache;
 
+        this.eventManager = new EventManager(this);
+
         this.initialized = this.init();
         process.on('beforeExit', async () => {
             this.stop();
@@ -86,6 +99,78 @@ export default class VoxifyClient extends Client {
 
     init(): boolean {
         this.out.debug('Initializing Bot...');
+
+        const modalFiles = fs.readdirSync(`${__dirname}/interactions/modalSubmits`);
+        for (const file of modalFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/interactions/modalSubmits`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
+
+                    this.modalSubmitInteractions.set(name, inst);
+                    this.out.debug(`Loaded modals.${file}`);
+                })
+                .catch(console.error);
+        }
+
+        const buttonFiles = fs.readdirSync(`${__dirname}/interactions/buttonCommands`);
+        for (const file of buttonFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/interactions/buttonCommands/${file}`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
+
+                    this.buttonCommandInteractions.set(name, inst);
+                    this.out.debug(`Loaded buttons.${file}`);
+                })
+                .catch(console.error);
+        }
+
+        const slashCommandFiles = fs.readdirSync(`${__dirname}/interactions/slashCommands`);
+        for (const file of slashCommandFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/interactions/slashCommands/${file}`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
+
+                    this.slashCommandInteractions.set(name, inst);
+                    this.out.debug(`Loaded slash.${file}`);
+                })
+                .catch(console.error);
+        }
+
+        const userContextFiles = fs.readdirSync(`${__dirname}/interactions/userContext`);
+        for (const file of userContextFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/interactions/userContext/${file}`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
+
+                    this.userContextInteractions.set(name, inst);
+                    this.out.debug(`Loaded context.user.${file}`);
+                })
+                .catch(console.error);
+        }
 
         return true;
     }
