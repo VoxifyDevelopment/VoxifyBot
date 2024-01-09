@@ -27,7 +27,7 @@ interface VoxifyGuildSettingsDocument extends mongoose.Document {
 const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocument>(
     {
         id: { type: String, unique: true, index: true, required: true },
-        locale: { type: String, required: true, default: 'en' }
+        locale: { type: String, required: true, default: 'en-us' }
     },
     { timestamps: true, collection: 'guild_settings' }
 );

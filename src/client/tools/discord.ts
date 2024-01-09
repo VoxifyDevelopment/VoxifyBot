@@ -17,4 +17,36 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ActivityType } from 'discord.js';
+
 export default () => {};
+
+/**
+ * Resolves the Discord activity type based on the provided string.
+ * @param {string | undefined} typeString - The string representation of the activity type.
+ * @returns {ActivityType} - The resolved activity type.
+ */
+export function resolveActivityType(typeString: string | undefined): ActivityType {
+    let type: ActivityType = ActivityType.Playing;
+    switch (typeString?.toUpperCase()) {
+        default:
+            type = ActivityType.Playing;
+            break;
+        case 'COMPETING':
+            type = ActivityType.Competing;
+            break;
+        case 'WATCHING':
+            type = ActivityType.Watching;
+            break;
+        case 'CUSTOM':
+            type = ActivityType.Custom;
+            break;
+        case 'STREAMING':
+            type = ActivityType.Streaming;
+            break;
+        case 'LISTENING':
+            type = ActivityType.Listening;
+            break;
+    }
+    return type;
+}
