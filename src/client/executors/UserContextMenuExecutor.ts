@@ -17,23 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import mongoose from 'mongoose';
+import { UserContextMenuCommandInteraction } from 'discord.js';
 
-interface VoxifyGuildSettingsDocument extends mongoose.Document {
-    id: string;
-    locale: string;
+import Executor from './Executor';
+import VoxifyClient from '../VoxifyClient';
+
+export interface UserContextMenuEvent {
+    bot: VoxifyClient;
+    interaction: UserContextMenuCommandInteraction;
 }
 
-const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocument>(
-    {
-        id: { type: String, unique: true, index: true, required: true },
-        locale: { type: String, required: true, default: 'en-us' }
-    },
-    { timestamps: true, collection: 'guild_settings' }
-);
-
-export const VoxifyGuildSettings =
-    mongoose.models.VoxifyGuildSettings ||
-    mongoose.model<VoxifyGuildSettingsDocument>('VoxifyGuildSettings', VoxifyGuildSettingsSchema);
-
-export default VoxifyGuildSettings;
+export default interface UserContextMenuExecutor extends Executor<UserContextMenuEvent> {}

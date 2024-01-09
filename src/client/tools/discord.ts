@@ -17,4 +17,92 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ActivityType, EmbedBuilder, Guild, User } from 'discord.js';
+import VoxifyClient from '../VoxifyClient';
+
 export default () => {};
+
+/**
+ * Resolves the Discord activity type based on the provided string.
+ * @param {string | undefined} typeString - The string representation of the activity type.
+ * @returns {ActivityType} - The resolved activity type.
+ */
+export function resolveActivityType(typeString: string | undefined): ActivityType {
+    let type: ActivityType = ActivityType.Playing;
+    switch (typeString?.toUpperCase()) {
+        default:
+            type = ActivityType.Playing;
+            break;
+        case 'COMPETING':
+            type = ActivityType.Competing;
+            break;
+        case 'WATCHING':
+            type = ActivityType.Watching;
+            break;
+        case 'CUSTOM':
+            type = ActivityType.Custom;
+            break;
+        case 'STREAMING':
+            type = ActivityType.Streaming;
+            break;
+        case 'LISTENING':
+            type = ActivityType.Listening;
+            break;
+    }
+    return type;
+}
+
+export type EmbedType = 'success' | 'warning' | 'error' | 'info' | 'default';
+export interface EmbedOptions {
+    type: EmbedType;
+    title?: string;
+    content: string;
+    guild?: Guild;
+    user?: User;
+    timestamp?: boolean | Date;
+    footerAddition?: string;
+    thumbnail?: string;
+}
+
+export async function generateEmbed(bot: VoxifyClient, options: EmbedOptions) {
+    let embed = new EmbedBuilder();
+    switch (options.type) {
+        case 'success':
+            embed.setColor('#008000');
+            break;
+        case 'warning':
+            embed.setColor('#FFA500');
+            break;
+        case 'error':
+            embed.setColor('#FF0000');
+            break;
+        case 'info':
+            embed.setColor('#0000FF');
+            break;
+        default:
+            embed.setColor('#808080');
+            break;
+    }
+
+    embed.setDescription(options.content);
+    embed.setFooter({
+        text: `VoxifyBot | ShardId: ${bot.shardId}${
+            options.footerAddition ? ` | ${options.footerAddition}` : ''
+        }`,
+        iconURL: (options.guild ? options.guild.iconURL() : bot.user?.displayAvatarURL()) || ''
+    });
+    embed.setThumbnail(options.thumbnail || bot.user?.displayAvatarURL() || '');
+    embed.setURL('https://github.com/VoxifyDevelopment/VoxifyBot');
+
+    if (options.title) embed.setTitle(options.title);
+
+    if (options.timestamp != null) {
+        if (options.timestamp != false && options.timestamp instanceof Date) {
+            embed.setTimestamp(options.timestamp);
+        } else {
+            embed.setTimestamp();
+        }
+    }
+
+    return embed;
+}

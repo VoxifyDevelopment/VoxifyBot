@@ -16,24 +16,3 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
-import mongoose from 'mongoose';
-
-interface VoxifyGuildSettingsDocument extends mongoose.Document {
-    id: string;
-    locale: string;
-}
-
-const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocument>(
-    {
-        id: { type: String, unique: true, index: true, required: true },
-        locale: { type: String, required: true, default: 'en-us' }
-    },
-    { timestamps: true, collection: 'guild_settings' }
-);
-
-export const VoxifyGuildSettings =
-    mongoose.models.VoxifyGuildSettings ||
-    mongoose.model<VoxifyGuildSettingsDocument>('VoxifyGuildSettings', VoxifyGuildSettingsSchema);
-
-export default VoxifyGuildSettings;

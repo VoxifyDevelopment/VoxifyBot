@@ -17,23 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import mongoose from 'mongoose';
+import { VoiceState } from 'discord.js';
+import VoxifyClient from '../VoxifyClient';
 
-interface VoxifyGuildSettingsDocument extends mongoose.Document {
-    id: string;
-    locale: string;
+export default class VoiceStateUpdateEvent {
+    static async execute(bot: VoxifyClient, oldState: VoiceState, newState: VoiceState) {
+        let guild = newState.guild;
+
+        return true;
+    }
 }
-
-const VoxifyGuildSettingsSchema = new mongoose.Schema<VoxifyGuildSettingsDocument>(
-    {
-        id: { type: String, unique: true, index: true, required: true },
-        locale: { type: String, required: true, default: 'en-us' }
-    },
-    { timestamps: true, collection: 'guild_settings' }
-);
-
-export const VoxifyGuildSettings =
-    mongoose.models.VoxifyGuildSettings ||
-    mongoose.model<VoxifyGuildSettingsDocument>('VoxifyGuildSettings', VoxifyGuildSettingsSchema);
-
-export default VoxifyGuildSettings;
