@@ -30,13 +30,13 @@ import UserContextMenuExecutor from '../../executors/UserContextMenuExecutor';
 export default class context implements UserContextMenuExecutor {
     id = (bot: VoxifyClient, localeName?: string) =>
         localeName
-            ? bot.translations.translateTo(localeName, 'context.user.kick-user.name')
-            : bot.translations.translate('context.user.kick-user.name');
+            ? bot.translations.translateTo(localeName, 'context.user.ban-user.name')
+            : bot.translations.translate('context.user.ban-user.name');
     data(bot: VoxifyClient) {
         const cmcBuilder = new ContextMenuCommandBuilder()
             .setType(ApplicationCommandType.User)
             .setDMPermission(false)
-            .setName(bot.translations.translate('context.user.kick-user.name'));
+            .setName(bot.translations.translate('context.user.ban-user.name'));
 
         let names = bot.translations.initializeLocales();
         Object.entries(bot.translations.translations).forEach(([localeName, translation]) => {
@@ -44,7 +44,7 @@ export default class context implements UserContextMenuExecutor {
             if (!Object.values(Locale).includes(normalizedLanguage as Locale)) return;
             let name = bot.translations.translateTo(
                 normalizedLanguage,
-                'context.user.kick-user.name'
+                'context.user.ban-user.name'
             );
             names[normalizedLanguage as Locale] = name;
         });
@@ -91,7 +91,7 @@ export default class context implements UserContextMenuExecutor {
         const { member } = resolvedArgs;
 
         target.voice
-            .disconnect(`TempVoice | kick requested by [user ${member.user.username}]`)
+            .disconnect(`TempVoice | ban requested by [user ${member.user.username}]`)
             .catch(console.error);
 
         const feedback = bot.translations.translateTo(localeName, 'feedback.success');
