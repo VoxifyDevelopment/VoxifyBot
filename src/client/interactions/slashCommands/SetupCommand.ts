@@ -26,7 +26,6 @@ import {
 } from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
-import { VoxifyGuildSettings } from '../../../database/models/VoxifyGuildSettings';
 
 export default class PingCommand implements SlashCommandExecutor {
     name = 'setup';
