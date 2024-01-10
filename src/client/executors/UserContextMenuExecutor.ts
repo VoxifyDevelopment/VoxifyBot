@@ -17,7 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { UserContextMenuCommandInteraction } from 'discord.js';
+import {
+    UserContextMenuCommandInteraction,
+    RESTPostAPIContextMenuApplicationCommandsJSONBody
+} from 'discord.js';
 
 import Executor from './Executor';
 import VoxifyClient from '../VoxifyClient';
@@ -27,4 +30,7 @@ export interface UserContextMenuEvent {
     interaction: UserContextMenuCommandInteraction;
 }
 
-export default interface UserContextMenuExecutor extends Executor<UserContextMenuEvent> {}
+export default interface UserContextMenuExecutor extends Executor<UserContextMenuEvent> {
+    id: (bot: VoxifyClient) => string;
+    data: (bot: VoxifyClient) => RESTPostAPIContextMenuApplicationCommandsJSONBody;
+}

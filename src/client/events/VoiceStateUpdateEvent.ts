@@ -20,10 +20,6 @@
 import { ChannelType, PermissionFlagsBits, VoiceState } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
 
-function isEmptyString(str: string): boolean {
-    return !str;
-}
-
 export default class VoiceStateUpdateEvent {
     static async execute(bot: VoxifyClient, oldState: VoiceState, newState: VoiceState) {
         let guild = newState.guild;
@@ -50,7 +46,7 @@ export default class VoiceStateUpdateEvent {
         // invoke deletion
         if (oldChannel && oldChannel?.parent?.id === containerCached) {
             let data = await bot.cache.redis.get(`tvc.${guild.id}.${oldChannel.id}`);
-            const isTempChannel = data != null && !isEmptyString(data);
+            const isTempChannel = data != null && !bot.tools.general.isEmptyString(data);
             if (isTempChannel) {
                 bot.cache.redis
                     .setEx(`tvc.${guild.id}.${oldChannel.id}`, 1, '')
@@ -80,19 +76,7 @@ export default class VoiceStateUpdateEvent {
                 name: member.displayName,
                 parent: containerCached,
                 type: ChannelType.GuildVoice,
-                reason: `TempVoice | new channel needed for [user ${member.user.username}]`,
-                permissionOverwrites: [
-                    {
-                        id: guild.id,
-                        allow: [
-                            PermissionFlagsBits.Connect,
-                            PermissionFlagsBits.Speak,
-                            PermissionFlagsBits.SendMessages,
-                            PermissionFlagsBits.SendMessagesInThreads,
-                            PermissionFlagsBits.UseApplicationCommands
-                        ]
-                    }
-                ]
+                reason: `TempVoice | new channel needed for [user ${member.user.username}]`
             });
             bot.out.debug(`TempVoice | new channel needed for [user ${member.user.username}]`);
 

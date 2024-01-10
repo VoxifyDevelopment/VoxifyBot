@@ -163,6 +163,9 @@ export default class VoxifyClient extends Client {
                         name = file.split('.')[0];
                     }
 
+                    if (inst.id && typeof inst.id == 'function') name = inst.id(this);
+                    else if (inst.id && typeof inst.id == 'string') name = inst.id;
+
                     this.userContextInteractions.set(name, inst);
                     this.out.debug(`Loaded context.user.${file}`);
                 })

@@ -18,9 +18,12 @@
  */
 
 import {
+    ApplicationCommandType,
     ButtonInteraction,
     CommandInteraction,
+    ContextMenuCommandBuilder,
     ModalSubmitInteraction,
+    SlashCommandBuilder,
     UserContextMenuCommandInteraction
 } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
@@ -30,11 +33,11 @@ import VoiceStateUpdateEvent from './VoiceStateUpdateEvent';
 export default class EventManager {
     private bot: VoxifyClient;
 
-    private button: ButtonInteractionExecutor = new ButtonInteractionExecutor();
-    private modal: ModalInteractionExecutor = new ModalInteractionExecutor();
-    private slash: CommandInteractionExecutor = new CommandInteractionExecutor();
-    private userContext: UserContextMenuInteractionExecutor =
-        new UserContextMenuInteractionExecutor();
+    private button: _ButtonInteractionEventExecutor = new _ButtonInteractionEventExecutor();
+    private modal: _ModalInteractionEventExecutor = new _ModalInteractionEventExecutor();
+    private slash: _CommandInteractionEventExecutor = new _CommandInteractionEventExecutor();
+    private userContext: _UserContextMenuInteractionEventExecutor =
+        new _UserContextMenuInteractionEventExecutor();
 
     constructor(bot: VoxifyClient) {
         this.bot = bot;
@@ -49,9 +52,14 @@ export default class EventManager {
             });
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
-            this.bot.slashCommandInteractions
-                .map((c) => c.data(this.bot))
-                .forEach((dataJSON) => this.bot.application?.commands.create(dataJSON));
+
+            let commandData = [
+                ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
+                ...this.bot.userContextInteractions.map((c) => c.data(this.bot))
+            ];
+
+            this.bot.application?.commands.set(commandData);
+
             this.bot.out.debug(
                 `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
             );
@@ -68,14 +76,15 @@ export default class EventManager {
 
         this.bot.on('interactionCreate', async (interaction) => {
             try {
+                // console.log(interaction);
                 if (interaction.isButton()) {
                     this.button.execute({ bot: this.bot, interaction }).catch(console.error);
                 } else if (interaction.isModalSubmit()) {
                     this.modal.execute({ bot: this.bot, interaction }).catch(console.error);
-                } else if (interaction.isCommand()) {
-                    this.slash.execute({ bot: this.bot, interaction }).catch(console.error);
                 } else if (interaction.isUserContextMenuCommand()) {
                     this.userContext.execute({ bot: this.bot, interaction }).catch(console.error);
+                } else if (interaction.isChatInputCommand()) {
+                    this.slash.execute({ bot: this.bot, interaction }).catch(console.error);
                 }
             } catch (error) {
                 this.bot.out.error('Error processing interaction:', error);
@@ -126,7 +135,7 @@ export interface ModalInteractionEvent {
     interaction: ModalSubmitInteraction;
 }
 
-export class ButtonInteractionExecutor implements Executor<ButtonInteractionEvent> {
+export class _ButtonInteractionEventExecutor implements Executor<ButtonInteractionEvent> {
     async execute(event: ButtonInteractionEvent): Promise<boolean> {
         try {
             return (
@@ -140,7 +149,7 @@ export class ButtonInteractionExecutor implements Executor<ButtonInteractionEven
     }
 }
 
-export class ModalInteractionExecutor implements Executor<ModalInteractionEvent> {
+export class _ModalInteractionEventExecutor implements Executor<ModalInteractionEvent> {
     async execute(event: ModalInteractionEvent): Promise<boolean> {
         try {
             return (
@@ -154,7 +163,7 @@ export class ModalInteractionExecutor implements Executor<ModalInteractionEvent>
     }
 }
 
-export class CommandInteractionExecutor implements Executor<CommandInteractionEvent> {
+export class _CommandInteractionEventExecutor implements Executor<CommandInteractionEvent> {
     async execute(event: CommandInteractionEvent): Promise<boolean> {
         try {
             return (
@@ -168,7 +177,7 @@ export class CommandInteractionExecutor implements Executor<CommandInteractionEv
     }
 }
 
-export class UserContextMenuInteractionExecutor
+export class _UserContextMenuInteractionEventExecutor
     implements Executor<UserContextMenuInteractionEvent>
 {
     async execute(event: UserContextMenuInteractionEvent): Promise<boolean> {
