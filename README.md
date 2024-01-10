@@ -71,7 +71,10 @@ an unparalleled user experience.
 
 - Build the Bot
 
+  - To build normal
   - > npm run build
+  - To build a compact and minified version of the bot
+  - > npm run build:min
 
 - Configure the bot
 
