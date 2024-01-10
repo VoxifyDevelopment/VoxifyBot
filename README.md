@@ -10,9 +10,9 @@
         <img src="https://img.shields.io/github/issues/VoxifyDevelopment/VoxifyBot.svg?style=for-the-badge">
     </a>
     <a href="https://www.typescriptlang.org/">
-        <img src="https://img.shields.io/badge/TypeScript-blue?style=for-the-badge&logo=typescript" alt="TypeScript">
+        <img src="https://img.shields.io/badge/TypeScript-grey?style=for-the-badge&logo=typescript" alt="TypeScript">
     </a>
-    <a href="https://github.com/your-username/your-repo/releases/tag/v1.0.0">
+    <a href="https://github.com/VoxifyDevelopment/VoxifyBot/releases/tag/v1.0.0">
         <img src="https://img.shields.io/badge/Version-1.0.0-brightgreen?style=for-the-badge" alt="Version">
     </a>
     <a href="https://github.com/VoxifyDevelopment/VoxifyBot/graphs/contributors">
