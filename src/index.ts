@@ -23,7 +23,6 @@ import Logger from './modules/Logger';
 import VoxifyTerminal from './terminal/VoxifyTerminal';
 import ShardManager from './ShardManager';
 import VoxifyClient from './client/VoxifyClient';
-import Database from './database/Database';
 import Cache from './caching/Cache';
 
 const out = new Logger('VoxifyBot', '[Main] »');
@@ -49,7 +48,7 @@ if (process.env.NODE_ENV === 'production') {
         .catch((error) => out.error(error));
 } else {
     VoxifyTerminal.new();
-    VoxifyClient.new(new Database(process.env.DATABASE_CONNECTION), new Cache()).start();
+    VoxifyClient.new(new Cache()).start();
 }
 
 process.on('exit', () => out.info('Bye! Shutdown complete.'));
