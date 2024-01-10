@@ -1,0 +1,8 @@
+node_modules/
+.*
+*.txt
+*.md
+!.env
+
+LICENSE
+licenseConfig.json

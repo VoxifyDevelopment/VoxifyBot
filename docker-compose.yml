@@ -1,0 +1,14 @@
+version: '3.9'
+
+services:
+  voxify_bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: voxify_bot:latest
+    container_name: voxify_bot
+    restart: always
+    depends_on:
+      - redis
+  redis:
+    image: 'redis:latest'

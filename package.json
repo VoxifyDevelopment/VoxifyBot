@@ -14,7 +14,7 @@
         "build:copy-files": "cp package.json ./dist/package.json && cp package-lock.json ./dist/package-lock.json && cp -n .env.example ./dist/.env || true",
         "build:install-dependencies": "npm --prefix ./dist ci || true",
         "build:copy-env": "cp -n .env.example ./dist/.env || true",
-        "build:minify": "node uglify",
+        "build:minify": "node uglify.js",
         "start": "NODE_ENV=production node .",
         "prettier": "npx prettier --write .",
         "licenseCheck": "license-check-and-add check -f ./licenseConfig.json",
