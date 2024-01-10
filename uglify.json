@@ -1,0 +1,13 @@
+{
+    "compress": true,
+    "ecma": 6,
+    "enclose": false,
+    "ie8": false,
+    "keep_classnames": false,
+    "keep_fnames": false,
+    "mangle": true,
+    "module": false,
+    "safari10": false,
+    "sourceMap": false,
+    "toplevel": false
+}

@@ -14,7 +14,7 @@
         "build:copy-files": "cp package.json ./dist/package.json && cp package-lock.json ./dist/package-lock.json && cp -n .env.example ./dist/.env || true",
         "build:install-dependencies": "npm --prefix ./dist ci || true",
         "build:copy-env": "cp -n .env.example ./dist/.env || true",
-        "build:minify": "find ./dist -type f -name '*.js' -not -path './dist/node_modules/*' -exec bash -c \"uglifyjs --mangle --compress --no-annotations --output {} -- {} && echo minified: {}\" \\;",
+        "build:minify": "node uglify",
         "start": "NODE_ENV=production node .",
         "prettier": "npx prettier --write .",
         "licenseCheck": "license-check-and-add check -f ./licenseConfig.json",
@@ -46,10 +46,12 @@
     },
     "devDependencies": {
         "@types/node": "^20.10.7",
+        "find": "^0.3.0",
+        "jsonminify": "^0.4.2",
         "license-check-and-add": "^4.0.5",
         "prettier": "^3.1.1",
+        "terser": "^5.26.0",
         "tsx": "^4.7.0",
-        "typescript": "^5.3.3",
-        "uglify-js": "^3.17.4"
+        "typescript": "^5.3.3"
     }
 }
