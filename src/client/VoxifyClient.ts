@@ -100,7 +100,7 @@ export default class VoxifyClient extends Client {
         const modalFiles = fs.readdirSync(`${__dirname}/interactions/modalSubmits`);
         for (const file of modalFiles) {
             if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
-            const modulePath: string = `${__dirname}/interactions/modalSubmits`;
+            const modulePath: string = `${__dirname}/interactions/modalSubmits/${file}`;
             import(modulePath)
                 .then((props) => {
                     let inst = new props.default();

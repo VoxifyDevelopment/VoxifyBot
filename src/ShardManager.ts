@@ -18,13 +18,11 @@
  */
 
 import Logger from './modules/Logger';
-import VoxifyTerminal from './terminal/VoxifyTerminal';
 import { ShardingManager } from 'discord.js';
 
 export default class ShardManager extends ShardingManager {
-    terminal: VoxifyTerminal;
     out: Logger;
-    constructor(terminal: VoxifyTerminal) {
+    constructor() {
         if (process.env.NODE_ENV !== 'production')
             throw new Error('You can only use sharding in "NODE_ENV=production" mode');
         super('./client/index.js', { mode: 'process' });
@@ -32,7 +30,6 @@ export default class ShardManager extends ShardingManager {
         if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
             this.out.setDebugging(9);
         }
-        this.terminal = terminal;
 
         this.on('shardCreate', (shard) => {
             this.out.info(`Shard ${shard.id} created...`);
@@ -51,7 +48,7 @@ export default class ShardManager extends ShardingManager {
         });
     }
 
-    static new(terminal: VoxifyTerminal): ShardManager {
-        return new ShardManager(terminal);
+    static new(): ShardManager {
+        return new ShardManager();
     }
 }

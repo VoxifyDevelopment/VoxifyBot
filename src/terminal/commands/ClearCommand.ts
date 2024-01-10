@@ -20,8 +20,13 @@
 import CommandExecutor, { Command } from '../CommandExecutor';
 
 export default class HelpCommand implements CommandExecutor {
+    name: string = 'clear';
+    aliases: string[] = ['c', 'cl', 'cls'];
+    description: string = 'Clears the console.';
+
     async run(command: Command) {
-        const { terminal, name, args } = command;
+        const { terminal, name, args, bot, shardManager } = command;
+
         console.clear();
         terminal.getLogger().log('Cleared...');
         terminal.iface.prompt();

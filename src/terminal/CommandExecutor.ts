@@ -17,15 +17,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import ShardManager from '../ShardManager';
+import VoxifyClient from '../client/VoxifyClient';
 import Terminal from './VoxifyTerminal';
 
 export interface Command {
     name: string;
     args: string[];
     terminal: Terminal;
+    shardManager?: ShardManager;
+    bot?: VoxifyClient;
 }
 
 export interface CommandExecutor {
+    name: string;
+    aliases: string[];
+    description: string;
+    help?: string[];
     run: (command: Command) => Promise<boolean>;
 }
 

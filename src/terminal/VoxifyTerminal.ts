@@ -18,20 +18,24 @@
  */
 
 import * as readline from 'readline';
+import * as fs from 'fs';
 import Logger from '../modules/Logger';
 import EventEmitter from 'events';
 import CommandMap from './CommandMap';
 import { Command } from './CommandExecutor';
-import HelpCommand from './commands/HelpCommand';
-import ClearCommand from './commands/ClearCommand';
+import ShardManager from '../ShardManager';
+import VoxifyClient from '../client/VoxifyClient';
 
 export default class VoxifyTerminal extends EventEmitter {
     private initialized: boolean = false;
     private out: Logger;
     iface: readline.Interface;
     commandMap: CommandMap = new CommandMap();
+    commands: string[] = [];
+    private bot?: VoxifyClient;
+    private shardManager?: ShardManager;
 
-    constructor() {
+    constructor(shardManagerOrBot: ShardManager | VoxifyClient) {
         super();
         this.out = new Logger('VoxifyBot', '[Cli ] »');
         if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
@@ -42,11 +46,18 @@ export default class VoxifyTerminal extends EventEmitter {
             output: process.stdout,
             prompt: ': '
         });
+
+        if (shardManagerOrBot instanceof ShardManager) {
+            this.shardManager = shardManagerOrBot;
+        } else if (shardManagerOrBot instanceof VoxifyClient) {
+            this.bot = shardManagerOrBot;
+        }
+
         this.initialized = this.init();
     }
 
-    static new() {
-        return new VoxifyTerminal();
+    static new(shardManagerOrBot: ShardManager | VoxifyClient) {
+        return new VoxifyTerminal(shardManagerOrBot);
     }
 
     init(): boolean {
@@ -59,19 +70,34 @@ export default class VoxifyTerminal extends EventEmitter {
             process.emit('SIGTERM');
         });
 
-        const helpCommand = new HelpCommand();
-        this.commandMap.set('help', helpCommand);
-        this.commandMap.set('?', helpCommand);
+        const commandFiles = fs.readdirSync(`${__dirname}/commands`);
+        for (const file of commandFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/commands/${file}`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
 
-        const clearCommand = new ClearCommand();
-        this.commandMap.set('clear', clearCommand);
-        this.commandMap.set('cl', clearCommand);
-        this.commandMap.set('c', clearCommand);
+                    this.commandMap.set(name, inst);
+                    inst.aliases.forEach((alias: string) => this.commandMap.set(alias, inst));
+                    this.commands.push(name);
+                    this.out.debug(
+                        `Loaded cli.commands.${file}${
+                            inst.aliases.length > 0 ? ' Aliases: ' + inst.aliases.join(', ') : ''
+                        }`
+                    );
+                })
+                .catch(console.error);
+        }
 
         setTimeout(() => {
             this.out.log('Voxify Terminal initialized. Type "help" for a list of commands.');
             this.iface.prompt();
-        }, 5000);
+        }, 1000);
 
         return true;
     }
@@ -102,7 +128,13 @@ export default class VoxifyTerminal extends EventEmitter {
             return;
         }
 
-        let command: Command = { args, name: commandName, terminal: this };
+        let command: Command = {
+            args,
+            name: commandName,
+            terminal: this,
+            shardManager: this.shardManager,
+            bot: this.bot
+        };
 
         try {
             commandExecutor.run(command).catch((err) => this.emit('error', err));
