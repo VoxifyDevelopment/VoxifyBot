@@ -83,6 +83,17 @@ export default class VoiceStateUpdateEvent {
             bot.cache.redis.set(`tvc.${guild.id}.${channel.id}`, member.id).catch(console.error);
             member.voice.setChannel(channel);
 
+            let guildLocaleName = guild.preferredLocale.toLowerCase();
+
+            bot.tools.discord.generateTempVoiceControls(
+                bot,
+                null,
+                guildLocaleName,
+                guildLocaleName,
+                true,
+                channel
+            );
+
             return true;
         }
 
