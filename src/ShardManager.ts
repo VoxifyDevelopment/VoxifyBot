@@ -25,7 +25,10 @@ export default class ShardManager extends ShardingManager {
     constructor() {
         if (process.env.NODE_ENV !== 'production')
             throw new Error('You can only use sharding in "NODE_ENV=production" mode');
-        super('./client/index.js', { mode: 'process', totalShards: 2 });
+        super('./client/index.js', {
+            mode: 'process',
+            totalShards: parseInt(process.env.SHARDS || '2') || 2
+        });
         this.out = new Logger('VoxifyBot', '[ShardManager] »');
         if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
             this.out.setDebugging(9);
