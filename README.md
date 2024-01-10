@@ -32,3 +32,57 @@ Elevate Discord voice channels with seamless management, multilingual support, a
 an unparalleled user experience.
 
 ---
+
+# Overview
+
+## Steps to Launch the bot
+
+### Clone Repository
+
+> git clone
+> [https://github.com/VoxifyDevelopment/VoxifyBot](https://github.com/VoxifyDevelopment/VoxifyBot)
+
+### Download and/or update the submodules
+
+> git submodule update --init
+
+### Install required node modules
+
+> npm install
+
+---
+
+#### Setup the development environment
+
+- Configure the bot
+
+  - Copy the environment file `cat .env.example > .env`
+  - Open the environment file in `.env` and insert the bot token and the redis connection url
+  - delete the redis connection if you don't want to enable persistent data storage for channels
+
+- Start the bot in watch mode
+
+  - > npm run devStart
+
+- Start the bot without watch mode
+  - > npm run dev
+
+#### Building and Launching the bot
+
+- Build the Bot
+
+  - > npm run build
+
+- Configure the bot
+
+  - Open the environment file in `dist/.env` and insert the bot token and the redis connection url
+  - delete the redis connection if you don't want to enable persistent data storage for channels
+
+- Launch the bot
+
+  - move to `dist/` and run
+  - > npm start
+
+---
+
+Copyright (c) 2023 - present | [voxify.dev](https://voxify.dev/) team and contributors
