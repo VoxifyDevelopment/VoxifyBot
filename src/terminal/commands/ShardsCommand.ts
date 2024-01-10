@@ -23,10 +23,60 @@ export default class ShardsCommand implements CommandExecutor {
     name: string = 'shards';
     aliases: string[] = [];
     description: string = 'Shows a list of available shards.';
+    help?: string[] = [
+        'list - shows a list of available shards.',
+        'restart <shardId> - restarts a given shard by its id.'
+    ];
 
     async run(command: Command) {
         const { terminal, name, args, bot, shardManager } = command;
         if (shardManager) {
+            let subCommand = args.shift();
+
+            switch (subCommand?.toLowerCase()) {
+                case 'list':
+                    terminal
+                        .getLogger()
+                        .log(
+                            '&e----------------------------------- SHARDS -----------------------------------&r'
+                        );
+                    shardManager.shards.forEach((shard) => {
+                        terminal
+                            .getLogger()
+                            .info(
+                                `- » ${shard.id} | ${
+                                    shard.process
+                                        ? `ProcessID: ${shard.process.pid}`
+                                        : `WorkerID: ${shard.worker?.threadId}`
+                                }`
+                            );
+                    });
+                    terminal
+                        .getLogger()
+                        .log(
+                            '&e----------------------------------- SHARDS -----------------------------------&r'
+                        );
+                    return true;
+                case 'restart':
+                    let shardId = args.shift();
+                    if (!shardId) break;
+
+                    if (!shardManager.shards.at(parseInt(shardId))) {
+                        terminal.getLogger().warning('That shard does not exist.');
+                        return true;
+                    }
+                    shardManager.shards.at(parseInt(shardId))?.respawn();
+                    terminal.getLogger().warning(`Restarting shard ${shardId}.`);
+                    return true;
+                default:
+                    break;
+            }
+
+            terminal.getLogger().log(`Command invalid. Usage:`);
+            this.help?.forEach((h) => {
+                terminal.getLogger().log(`&7&a» ${this.name}&7${h}`);
+            });
+
             return true;
         }
         terminal
