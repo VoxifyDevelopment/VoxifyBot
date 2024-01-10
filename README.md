@@ -82,7 +82,7 @@ an unparalleled user experience.
   - delete the redis connection if you don't want to enable persistent data storage for channels
   - you can also overwrite environment variables using command arguments
   - for example:
-  - > npm start BOT*TOKEN=MTE123445.asdf.ghjk*... REDIS_CONNECTION=redis://default@127.0.0.1:6379/
+  - > npm start BOT_TOKEN=MTE123445.asdf.ghjk... REDIS_CONNECTION=redis://default@127.0.0.1:6379/
 
 - Launch the bot
 
