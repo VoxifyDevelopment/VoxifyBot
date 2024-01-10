@@ -20,17 +20,6 @@ if (!fs.existsSync(cacheContainer)) {
     fs.mkdirSync(cacheContainer, true);
 }
 
-// Load or initialize the cache
-let cache = {};
-if (fs.existsSync(cacheFilePath)) {
-    try {
-        cache = JSON.parse(fs.readFileSync(cacheFilePath, 'utf8'));
-    } catch (error) {
-        console.error(`Error loading cache: ${error}`);
-        return;
-    }
-}
-
 // Load or initialize the nameCache
 let nameCache = {};
 if (fs.existsSync(nameCachePath)) {
@@ -47,12 +36,6 @@ async function minifyFile(filePath) {
     const fileContent = fs.readFileSync(filePath, 'utf8');
 
     let result;
-    // Check if the file has changed
-    const hash = require('crypto').createHash('sha256').update(fileContent).digest('hex');
-    if (cache[filePath] === hash) {
-        console.log(`Skipped minification for unchanged json file: ${filePath}`);
-        return;
-    }
 
     // Minify JavaScript files
     if (filePath.endsWith('.js')) {
@@ -76,9 +59,6 @@ async function minifyFile(filePath) {
     // Save the minified content to the output file
     fs.writeFileSync(filePath, result.code, 'utf8');
 
-    // Update the cache
-    cache[filePath] = hash;
-
     console.log(`Successfully Minified: ${filePath}`);
 }
 
@@ -93,8 +73,6 @@ const files = find.fileSync(/\.(js|json)$/, './dist').filter((file) => {
         await minifyFile(file);
     }
 
-    // Save the updated cache
-    fs.writeFileSync(cacheFilePath, JSON.stringify(cache, null, 2), 'utf8');
     // Save the updated nameCache
     fs.writeFileSync(nameCachePath, JSON.stringify(nameCache, null, 2), 'utf8');
 })();
