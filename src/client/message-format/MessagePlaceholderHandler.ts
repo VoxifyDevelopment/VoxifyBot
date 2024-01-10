@@ -46,6 +46,7 @@ export default class MessagePlaceholderHandler {
      */
     fastFormat(format: string, values?: MessagePlaceholderHandlerOptions): string {
         const replacements = { ...this.getDefaultReplacements(), ...values };
+        // console.log(format);
 
         let formatter = format;
         const valueList: string[] = [];
@@ -59,15 +60,22 @@ export default class MessagePlaceholderHandler {
             const index = formatter.indexOf(key);
 
             if (index !== -1) {
-                formatter = formatter.replace(key, '%s');
+                // console.log(key, index);
+                formatter = formatter.replace(key, '%s-' + valueList.length);
                 valueList.push(replacements[key.slice(2, -1)]);
             }
 
             match = pattern.exec(format);
         }
 
-        const formatted = formatter.replace('%s', (...args) => String(valueList.shift()));
-        return formatted;
+        // console.log(valueList);
+
+        for (let i = 0; i < valueList.length; i++) {
+            formatter = formatter.replace('%s-' + i, valueList[i] || 'none');
+        }
+
+        // console.log(formatter);
+        return formatter;
     }
 
     /**

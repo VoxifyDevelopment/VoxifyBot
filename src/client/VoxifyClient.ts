@@ -23,7 +23,6 @@ import * as discord from './tools/discord';
 import * as general from './tools/general';
 import Logger from '../modules/Logger';
 import Cache from '../caching/Cache';
-import Database from '../database/Database';
 import TranslationHandler from './message-format/TranslationHandler';
 import path from 'path';
 import * as fs from 'fs';
@@ -37,7 +36,6 @@ import UserContextMenuExecutor from './executors/UserContextMenuExecutor';
 export default class VoxifyClient extends Client {
     initialized: boolean = false;
     out: Logger;
-    db: Database;
     cache: Cache;
     translations: TranslationHandler;
     shardId: number = 0;
@@ -54,7 +52,7 @@ export default class VoxifyClient extends Client {
     userContextInteractions: Collection<string, UserContextMenuExecutor> = new Collection();
     messageContextInteractions: Collection<string, any> = new Collection();
 
-    constructor(database: Database, cache: Cache, shardId?: number) {
+    constructor(cache: Cache, shardId?: number) {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
             partials: []
@@ -82,7 +80,6 @@ export default class VoxifyClient extends Client {
             );
         });
 
-        this.db = database;
         this.cache = cache;
 
         this.eventManager = new EventManager(this);
@@ -93,8 +90,8 @@ export default class VoxifyClient extends Client {
         });
     }
 
-    static new(database: Database, cache: Cache) {
-        return new VoxifyClient(database, cache);
+    static new(cache: Cache) {
+        return new VoxifyClient(cache);
     }
 
     init(): boolean {

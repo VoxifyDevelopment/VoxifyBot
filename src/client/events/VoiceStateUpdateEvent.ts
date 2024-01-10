@@ -17,12 +17,90 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { VoiceState } from 'discord.js';
+import { ChannelType, PermissionFlagsBits, VoiceState } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
+
+function isEmptyString(str: string): boolean {
+    return !str;
+}
 
 export default class VoiceStateUpdateEvent {
     static async execute(bot: VoxifyClient, oldState: VoiceState, newState: VoiceState) {
         let guild = newState.guild;
+        let member = newState.member;
+        if (!member) return true;
+
+        if (
+            !guild.members.cache
+                .get(bot.user?.id || '')
+                ?.permissions.has(PermissionFlagsBits.ManageChannels)
+        )
+            return false; // early return if bot cannot manage channels
+
+        let containerCached = await bot.cache.redis
+            .get(`containerCached.${guild.id}`)
+            .catch(console.error);
+        if (!containerCached) return false;
+        let lobbyCached = await bot.cache.redis.get(`lobbyCached.${guild.id}`).catch(console.error);
+        if (!lobbyCached) return false;
+
+        let oldChannel = oldState.channel;
+        let newChannel = newState.channel;
+
+        // invoke deletion
+        if (oldChannel && oldChannel?.parent?.id === containerCached) {
+            let data = await bot.cache.redis.get(`tvc.${guild.id}.${oldChannel.id}`);
+            const isTempChannel = data != null && !isEmptyString(data);
+            if (isTempChannel) {
+                bot.cache.redis
+                    .setEx(`tvc.${guild.id}.${oldChannel.id}`, 1, '')
+                    .catch(console.error);
+
+                if (oldChannel.members.size < 1) {
+                    oldChannel
+                        .delete(
+                            `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
+                        )
+                        .catch(console.error);
+                    bot.out.debug(
+                        `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
+                    );
+                }
+            }
+        }
+
+        if (newChannel && newChannel.id === lobbyCached) {
+            let container =
+                guild.channels.cache.get(containerCached) ||
+                (await guild.channels.fetch(containerCached).catch(() => {}));
+
+            if (!container || typeof container === 'function') return false;
+
+            let channel = await guild.channels.create({
+                name: member.displayName,
+                parent: containerCached,
+                type: ChannelType.GuildVoice,
+                reason: `TempVoice | new channel needed for [user ${member.user.username}]`,
+                permissionOverwrites: [
+                    {
+                        id: guild.id,
+                        allow: [
+                            PermissionFlagsBits.Connect,
+                            PermissionFlagsBits.Speak,
+                            PermissionFlagsBits.SendMessages,
+                            PermissionFlagsBits.SendMessagesInThreads,
+                            PermissionFlagsBits.UseApplicationCommands
+                        ]
+                    }
+                ]
+            });
+            bot.out.debug(`TempVoice | new channel needed for [user ${member.user.username}]`);
+
+            bot.cache.redis.set(`tvc.${guild.id}.${channel.id}`, member.id).catch(console.error);
+            member.voice.setChannel(channel);
+
+            return true;
+        }
 
         return true;
     }
