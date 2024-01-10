@@ -17,9 +17,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChannelType, Locale, SlashCommandBuilder } from 'discord.js';
+import {
+    ChannelType,
+    CommandInteractionOptionResolver,
+    Locale,
+    PermissionFlagsBits,
+    SlashCommandBuilder
+} from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
+import { VoxifyGuildSettings } from '../../../database/models/VoxifyGuildSettings';
 
 export default class PingCommand implements SlashCommandExecutor {
     name = 'setup';
@@ -100,25 +107,181 @@ export default class PingCommand implements SlashCommandExecutor {
             channelOption.addChannelTypes(ChannelType.GuildVoice);
 
             channelOption.setName(bot.translations.translate('commands.setup.options.lobby.name'));
-            channelOption.setDescription(
-                bot.translations.translate('commands.setup.options.lobby.name')
-            );
+            channelOption.setDescription(bot.translations.translate('c.options.lobby.name'));
 
             channelOption.setNameLocalizations(optionLobbyNames);
             channelOption.setDescriptionLocalizations(optionLobbyDescriptions);
             return channelOption;
         });
 
+        dataJson
+            .setDMPermission(false)
+            .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
+
         return dataJson.toJSON();
     };
 
     async execute(event: SlashCommandEvent) {
         const { bot, interaction } = event;
+        const guild = interaction.guild;
+        if (!guild) return false;
+        const member = interaction.member;
+        if (!member) return false;
+
         let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
             ? interaction.locale.toLowerCase()
             : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
 
-        interaction.reply('Not implemented yet.');
+        if (
+            !guild.members.cache
+                .get(bot.user?.id || '')
+                ?.permissions.has(PermissionFlagsBits.ManageChannels)
+        ) {
+            const key = bot.translations.translateTo(localeName, 'commands.setup.name');
+            const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+            const content = bot.translations.translateTo(
+                localeName,
+                'commands.setup.result.error',
+                {
+                    error: bot.translations.translateTo(localeName, 'commands.setup.errors.no-perm')
+                }
+            );
+            interaction
+                .reply({
+                    embeds: [
+                        await bot.tools.discord.generateEmbed(bot, {
+                            type: 'warning',
+                            title: `${feedback} /${key}`,
+                            content,
+                            guild: interaction.guild || undefined,
+                            user: interaction.user,
+                            timestamp: true
+                        })
+                    ],
+                    ephemeral: true
+                })
+                .catch(console.error);
+
+            return false;
+        }
+
+        let stop = false;
+        setTimeout(async () => {
+            if (stop) return;
+            stop = true;
+
+            const key = bot.translations.translateTo(localeName, 'commands.setup.name');
+            const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+            const content = bot.translations.translateTo(
+                localeName,
+                'commands.setup.result.error',
+                {
+                    error: '```\nDatabase performance currently too slow...\n```'
+                }
+            );
+            interaction
+                .reply({
+                    embeds: [
+                        await bot.tools.discord.generateEmbed(bot, {
+                            type: 'error',
+                            title: `${feedback} /${key}`,
+                            content,
+                            guild: interaction.guild || undefined,
+                            user: interaction.user,
+                            timestamp: true
+                        })
+                    ],
+                    ephemeral: true
+                })
+                .catch(console.error);
+        }, 800);
+
+        let options = interaction.options as CommandInteractionOptionResolver;
+        let requestedContainer = options.getChannel('container');
+        let requestedLobby = options.getChannel('lobby');
+
+        if (!requestedContainer || !requestedLobby) {
+            const key = bot.translations.translateTo(localeName, 'commands.setup.name');
+            const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+            const content = bot.translations.translateTo(
+                localeName,
+                'commands.setup.result.error',
+                {
+                    error: !requestedContainer
+                        ? bot.translations.translateTo(
+                              localeName,
+                              'commands.setup.errors.no-access-container'
+                          )
+                        : bot.translations.translateTo(
+                              localeName,
+                              'commands.setup.errors.no-access-lobby'
+                          )
+                }
+            );
+            interaction
+                .reply({
+                    embeds: [
+                        await bot.tools.discord.generateEmbed(bot, {
+                            type: 'warning',
+                            title: `${feedback} /${key}`,
+                            content,
+                            guild: interaction.guild || undefined,
+                            user: interaction.user,
+                            timestamp: true
+                        })
+                    ],
+                    ephemeral: true
+                })
+                .catch(console.error);
+
+            return false;
+        }
+
+        let containerCached = await bot.cache.redis.get(`containerCached.${guild.id}`);
+        let lobbyCached = await bot.cache.redis.get(`lobbyCached.${guild.id}`);
+
+        if (containerCached != requestedContainer.id) {
+            await bot.cache.redis.set(`containerCached.${guild.id}`, requestedContainer.id);
+        }
+
+        if (lobbyCached != requestedLobby.id) {
+            await bot.cache.redis.set(`lobbyCached.${guild.id}`, requestedLobby.id);
+        }
+
+        if (stop) return false;
+        stop = true;
+
+        const key = bot.translations.translateTo(localeName, 'commands.setup.name');
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+        let content = bot.translations.translateTo(localeName, 'commands.setup.result.success', {
+            channel: ` <#${requestedLobby.id}>`,
+            container: ` <#${requestedContainer.id}>`
+        });
+
+        if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
+            content += `
+
+\`\`\`
+lobbyCached.${guild.id}     | ${requestedLobby.id} | ${requestedLobby.name}
+containerCached.${guild.id} | ${requestedContainer.id} | ${requestedContainer.name}
+\`\`\``;
+        }
+
+        interaction
+            .reply({
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        title: `${feedback} /${key}`,
+                        content,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
+            })
+            .catch(console.error);
 
         return true;
     }
