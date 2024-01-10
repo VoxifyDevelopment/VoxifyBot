@@ -45,7 +45,9 @@ export default class HelpCommand implements CommandExecutor {
                     );
                 terminal.getLogger().log(`&7  -» &a${command.description}`);
                 if (command.help && command.help?.length > 0)
-                    terminal.getLogger().log(`${command.help?.join('\n&7    &a» &7')}`);
+                    command.help.forEach((h) => {
+                        terminal.getLogger().log(`&7    &a» &7${h}`);
+                    });
             });
         terminal
             .getLogger()
