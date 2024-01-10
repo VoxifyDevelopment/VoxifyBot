@@ -18,8 +18,12 @@
  */
 
 import {
+    APIEmbedField,
+    ActionRowBuilder,
     ActivityType,
+    ButtonBuilder,
     ButtonInteraction,
+    ButtonStyle,
     CommandInteraction,
     EmbedBuilder,
     Guild,
@@ -28,11 +32,15 @@ import {
     ModalSubmitInteraction,
     PermissionFlagsBits,
     PermissionResolvable,
+    TextBasedChannel,
     User,
     UserContextMenuCommandInteraction,
     VoiceBasedChannel
 } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
+
+import controlsCtx from '../../i18n/en-US/controls.json';
+import linksCtx from '../../i18n/en-US/links.json';
 
 export default () => {};
 
@@ -78,6 +86,7 @@ export interface EmbedOptions {
     timestamp?: boolean | Date; // Whether to include a timestamp in the embed
     footerAddition?: string; // Additional text for the footer
     thumbnail?: string; // URL for the thumbnail image
+    url?: string;
 }
 
 /**
@@ -118,10 +127,19 @@ export async function generateEmbed(
         text: `VoxifyBot | ShardId: ${bot.shardId}${
             options.footerAddition ? ` | ${options.footerAddition}` : ''
         }`,
-        iconURL: (options.guild ? options.guild.iconURL() : bot.user?.displayAvatarURL()) || ''
+        iconURL:
+            (options.guild ? options.guild.iconURL() : bot.user?.displayAvatarURL()) ||
+            'https://avatars.githubusercontent.com/u/155932207?s=220'
     });
-    embed.setThumbnail(options.thumbnail || bot.user?.displayAvatarURL() || '');
-    embed.setURL('https://github.com/VoxifyDevelopment/VoxifyBot');
+    embed.setThumbnail(
+        options.thumbnail ||
+            bot.user?.displayAvatarURL() ||
+            'https://avatars.githubusercontent.com/u/155932207?s=220'
+    );
+
+    if (options.url) {
+        embed.setURL(options.url || 'https://github.com/VoxifyDevelopment/VoxifyBot');
+    }
 
     // Set the title if provided
     if (options.title) embed.setTitle(options.title);
@@ -239,6 +257,8 @@ export async function checkTvcArgs(
         | CommandInteraction
         | UserContextMenuCommandInteraction
         | MessageContextMenuCommandInteraction,
+    checkManagement: boolean = true,
+    checkChannel: boolean = true,
     botPerms?: PermissionResolvable,
     target?: GuildMember,
     ownerOnly: boolean = false
@@ -251,80 +271,229 @@ export async function checkTvcArgs(
         return false;
     }
 
-    // Check if voice channel exists
-    if (!channel) {
-        await bot.tools.discord.tvcError('no-vc', command, bot, localeName, interaction);
-        return false;
-    }
+    if (checkChannel) {
+        // Check if voice channel exists
+        if (!channel) {
+            await bot.tools.discord.tvcError('no-vc', command, bot, localeName, interaction);
+            return false;
+        }
 
-    // Check if the channel is a temporary voice channel
-    let ownerId = await bot.cache.redis.get(`tvc.${member.guild.id}.${channel.id}`);
-    const isTempChannel = ownerId != null && !bot.tools.general.isEmptyString(ownerId);
+        // Check if the channel is a temporary voice channel
+        let ownerId = await bot.cache.redis.get(`tvc.${member.guild.id}.${channel.id}`);
+        const isTempChannel = ownerId != null && !bot.tools.general.isEmptyString(ownerId);
 
-    if (!isTempChannel) {
-        await bot.tools.discord.tvcError('no-tvc', command, bot, localeName, interaction);
-        return false;
+        if (!isTempChannel) {
+            await bot.tools.discord.tvcError('no-tvc', command, bot, localeName, interaction);
+            return false;
+        }
     }
 
     // Check bot permissions
-    const bm = channel.guild.members.cache.get(bot.user?.id || '');
-    if (!bm) {
-        await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
-        return false;
-    }
-    const botPerform =
-        bm.permissions.has(PermissionFlagsBits.Administrator) && botPerms
-            ? channel.permissionsFor(bm).has(botPerms)
-            : true;
-    if (!botPerform) {
-        await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
-        return false;
-    }
-
-    // Check user's permissions
-    const perms = channel.permissionsFor(member);
-    const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator);
-    const isManager =
-        perms.has(PermissionFlagsBits.ManageChannels) || perms.has(PermissionFlagsBits.ManageGuild);
-    const channelOwner = member.id === ownerId;
-
-    if (!channelOwner && ownerOnly) {
-        await bot.tools.discord.tvcError('not-your-tvc', command, bot, localeName, interaction);
-        return false;
+    if (botPerms && channel) {
+        const bm = member.guild.members.cache.get(bot.user?.id || '');
+        if (!bm) {
+            await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
+            return false;
+        }
+        const botPerform =
+            bm.permissions.has(PermissionFlagsBits.Administrator) &&
+            channel.permissionsFor(bm).has(botPerms);
+        if (!botPerform) {
+            await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
+            return false;
+        }
     }
 
-    if (!channelOwner && !isAdmin && !isManager) {
-        await bot.tools.discord.tvcError('no-perm', command, bot, localeName, interaction);
-        return false;
+    if (checkManagement && channel) {
+        let ownerId = await bot.cache.redis.get(`tvc.${member.guild.id}.${channel.id}`);
+        // Check user's permissions
+        const perms = channel.permissionsFor(member);
+        const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator);
+        const isManager =
+            perms.has(PermissionFlagsBits.ManageChannels) ||
+            perms.has(PermissionFlagsBits.ManageGuild);
+        const channelOwner = member.id === ownerId;
+
+        if (!channelOwner && ownerOnly) {
+            await bot.tools.discord.tvcError('not-your-tvc', command, bot, localeName, interaction);
+            return false;
+        }
+
+        if (!channelOwner && !isAdmin && !isManager) {
+            await bot.tools.discord.tvcError('no-perm', command, bot, localeName, interaction);
+            return false;
+        }
     }
 
     // Check additional conditions if a target is provided
-    if (!target) return true;
+    if (target && channel) {
+        if (target.id === member.id && process.env.NODE_ENV === 'production') {
+            await bot.tools.discord.tvcError(
+                'target-yourself',
+                command,
+                bot,
+                localeName,
+                interaction
+            );
+            return false;
+        }
 
-    if (target.id === member.id && process.env.NODE_ENV === 'production') {
-        await bot.tools.discord.tvcError('target-yourself', command, bot, localeName, interaction);
-        return false;
-    }
+        if (target.user.bot && process.env.NODE_ENV === 'production') {
+            await bot.tools.discord.tvcError('bots-ignored', command, bot, localeName, interaction);
+            return false;
+        }
 
-    if (target.user.bot && process.env.NODE_ENV === 'production') {
-        await bot.tools.discord.tvcError('bots-ignored', command, bot, localeName, interaction);
-        return false;
-    }
+        if (
+            (target.permissions.has(PermissionFlagsBits.Administrator) ||
+                target.permissions.has(PermissionFlagsBits.ManageGuild)) &&
+            process.env.NODE_ENV === 'production'
+        ) {
+            await bot.tools.discord.tvcError('target-power', command, bot, localeName, interaction);
+            return false;
+        }
 
-    if (
-        (target.permissions.has(PermissionFlagsBits.Administrator) ||
-            target.permissions.has(PermissionFlagsBits.ManageGuild)) &&
-        process.env.NODE_ENV === 'production'
-    ) {
-        await bot.tools.discord.tvcError('target-power', command, bot, localeName, interaction);
-        return false;
-    }
-
-    if (target.voice.channel?.id !== channel.id) {
-        await bot.tools.discord.tvcError('target-outside', command, bot, localeName, interaction);
-        return false;
+        if (target.voice.channel?.id !== channel.id) {
+            await bot.tools.discord.tvcError(
+                'target-outside',
+                command,
+                bot,
+                localeName,
+                interaction
+            );
+            return false;
+        }
     }
 
     // All checks passed
     return true;
+}
+
+export async function generateTempVoiceControls(
+    bot: VoxifyClient,
+    interaction:
+        | ButtonInteraction
+        | ModalSubmitInteraction
+        | CommandInteraction
+        | UserContextMenuCommandInteraction
+        | MessageContextMenuCommandInteraction
+        | null,
+    localeUser: string,
+    localeGuild: string,
+    show: boolean,
+    channel?: TextBasedChannel | VoiceBasedChannel | null
+) {
+    const finalShow = show && channel;
+    const usedLocale = finalShow ? localeGuild : localeUser;
+    let controlsEmbed = await bot.tools.discord.generateEmbed(bot, {
+        type: 'success',
+        title: await bot.translations.translateTo(usedLocale, 'controls.name'),
+        content: await bot.translations.translateTo(usedLocale, 'controls.description'),
+        timestamp: true
+    });
+
+    let buttonFields: APIEmbedField[] = [];
+    const buttons: ActionRowBuilder<ButtonBuilder>[] = [];
+    let currentRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
+
+    for (const [key, value] of Object.entries(controlsCtx.buttons)) {
+        if (currentRow.components.length === 5) {
+            buttons.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+        const emoji = bot.translations.translateTo(usedLocale, `controls.buttons.${key}.emoji`);
+        currentRow.addComponents(
+            new ButtonBuilder()
+                .setCustomId(`control-${key}`)
+                .setEmoji(emoji)
+                .setStyle(ButtonStyle.Secondary)
+        );
+
+        buttonFields.push({
+            name: `[ ${emoji} ] «${bot.translations.translateTo(
+                usedLocale,
+                `controls.buttons.${key}.name`
+            )}»`,
+            value: bot.translations.translateTo(usedLocale, `controls.buttons.${key}.description`),
+            inline: true
+        });
+    }
+
+    controlsEmbed.addFields(buttonFields);
+
+    for (const [key, value] of Object.entries(linksCtx)) {
+        if (currentRow.components.length >= 2) {
+            buttons.push(currentRow);
+            currentRow = new ActionRowBuilder();
+        }
+
+        currentRow.addComponents(
+            new ButtonBuilder()
+                .setLabel(' ' + value.name)
+                .setEmoji(value.emoji)
+                .setURL(value.url)
+                .setStyle(ButtonStyle.Link)
+        );
+    }
+
+    // Add the last row if not empty
+    if (currentRow.components.length > 0) {
+        buttons.push(currentRow);
+    }
+
+    if (finalShow && interaction != null) {
+        let message = await channel
+            .send({
+                embeds: [controlsEmbed],
+                components: buttons
+            })
+            .catch(console.error);
+        if (!message) {
+            interaction
+                .reply({
+                    embeds: [
+                        await bot.tools.discord.generateEmbed(bot, {
+                            type: 'error',
+                            content: await bot.translations.translateTo(
+                                localeUser,
+                                'controls.error-message'
+                            ),
+                            guild: interaction.guild || undefined,
+                            user: interaction.user,
+                            timestamp: true
+                        })
+                    ],
+                    ephemeral: true
+                })
+                .catch(console.error);
+            return;
+        }
+        interaction
+            .reply({
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        content: await bot.translations.translateTo(
+                            localeUser,
+                            'controls.success-message'
+                        ),
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
+            })
+            .catch(console.error);
+    } else if (channel) {
+        channel.send({
+            embeds: [controlsEmbed],
+            components: buttons
+        });
+    } else if (interaction) {
+        interaction.reply({
+            ephemeral: true,
+            embeds: [controlsEmbed],
+            components: buttons
+        });
+    }
 }
