@@ -80,6 +80,9 @@ an unparalleled user experience.
 
   - Open the environment file in `dist/.env` and insert the bot token and the redis connection url
   - delete the redis connection if you don't want to enable persistent data storage for channels
+  - you can also overwrite environment variables using command arguments
+  - for example:
+  - > npm start BOT*TOKEN=MTE123445.asdf.ghjk*... REDIS_CONNECTION=redis://default@127.0.0.1:6379/
 
 - Launch the bot
 
