@@ -52,8 +52,8 @@ export default class FakeRedis extends EventEmitter {
      * @param value - The value to associate with the key.
      * @returns A Promise that resolves once the value is set in the cache.
      */
-    async set(key: string, value: string): Promise<void> {
-        this.cache[key] = value;
+    async set(key: string, value: string | number): Promise<void> {
+        this.cache[key] = String(value);
     }
 
     /**
@@ -102,12 +102,12 @@ export default class FakeRedis extends EventEmitter {
     /**
      * Sets the value associated with the given key in the cache with an expiration time (in seconds).
      * @param key - The key to set in the cache.
-     * @param value - The value to associate with the key.
      * @param seconds - The expiration time in seconds.
+     * @param value - The value to associate with the key.
      * @returns A Promise that resolves once the value is set in the cache with the specified expiration time.
      */
-    async setEx(key: string, value: string, seconds: number): Promise<void> {
-        this.cache[key] = value;
+    async setEx(key: string, seconds: number, value: string | number): Promise<void> {
+        this.cache[key] = String(value);
 
         // Check if there is an existing timeout for the same key
         if (this.timeouts.hasOwnProperty(`${key}_timeout`)) {
