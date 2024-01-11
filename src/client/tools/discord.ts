@@ -425,14 +425,18 @@ export async function generateTempVoiceControls(
     show: boolean,
     channel?: TextBasedChannel | VoiceBasedChannel | null
 ) {
-    if (!controlsCtx)
+    if (!controlsCtx) {
         controlsCtx =
-            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error))
-                ?.default || {};
-    if (!linksCtx)
+            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error)) ||
+            {};
+
+        console.log(controlsCtx);
+    }
+
+    if (!linksCtx) {
         linksCtx =
-            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error))
-                ?.default || {};
+            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error)) || {};
+    }
 
     const finalShow = show && channel;
     const usedLocale = finalShow ? localeGuild : localeUser;
