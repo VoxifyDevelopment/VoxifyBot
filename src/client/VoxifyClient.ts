@@ -41,6 +41,8 @@ export default class VoxifyClient extends Client {
     shardId: number = 0;
     cachePrefix: string = '';
 
+    premiumEnabled: boolean = false;
+
     tools = { discord, general };
 
     eventManager: EventManager;

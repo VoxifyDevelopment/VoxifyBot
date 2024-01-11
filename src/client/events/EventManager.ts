@@ -49,8 +49,8 @@ export default class EventManager {
                 shardId
             });
 
-            const premium = await premiumCheckAndAdd(bot).catch(console.error);
-            if (!premium) bot.out.debug('Sadly the premium features are disabled');
+            bot.premiumEnabled = (await premiumCheckAndAdd(bot).catch(console.error)) || false;
+            if (!bot.premiumEnabled) bot.out.debug('Sadly the premium features are disabled');
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
 
@@ -104,15 +104,16 @@ export default class EventManager {
             );
         });
 
-        this.bot.on('voiceStateUpdate', async (oldState, newState) => {
-            try {
-                VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
-                    this.bot.out.logError(err)
-                );
-            } catch (err) {
-                this.bot.out.error(err);
-            }
-        });
+        if (!bot.premiumEnabled)
+            this.bot.on('voiceStateUpdate', async (oldState, newState) => {
+                try {
+                    VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
+                        this.bot.out.logError(err)
+                    );
+                } catch (err) {
+                    this.bot.out.error(err);
+                }
+            });
     }
 }
 
