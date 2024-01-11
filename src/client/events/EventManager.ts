@@ -43,10 +43,11 @@ export default class EventManager {
         this.bot.on('shardReady', async (shardId) => {
             this.bot.shardId = shardId;
             this.bot.cachePrefix = `${this.bot.user?.id}.${shardId}`;
+
             this.bot.user?.setActivity({
                 name: `Users / Voice Channels`,
                 type: this.bot.tools.discord.resolveActivityType('watching'),
-                shardId
+                shardId: shardId
             });
 
             this.bot.premiumEnabled =

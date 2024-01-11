@@ -36,12 +36,6 @@ export default class ShardManager extends ShardingManager {
 
         this.on('shardCreate', (shard) => {
             this.out.info(`Shard ${shard.id} created...`);
-
-            // set stdout and stderr to main process
-            if (shard.process) {
-                shard.process.stdout = process.stdout;
-                shard.process.stderr = process.stderr;
-            }
         });
 
         process.on('beforeExit', async () => {

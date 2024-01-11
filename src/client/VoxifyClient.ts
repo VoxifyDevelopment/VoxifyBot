@@ -189,16 +189,16 @@ export default class VoxifyClient extends Client {
     async start(): Promise<boolean> {
         this.out.debug('Staring Bot...');
 
-        if (!process.env.DISCORD_TOKEN) {
-            throw new Error('Missing environment variables DISCORD_TOKEN');
+        if (!process.env.BOT_TOKEN) {
+            throw new Error('Missing environment variables BOT_TOKEN');
         }
 
         this.on('disconnect', (event) => {
             console.error(`Bot disconnected with code ${event.code}.`);
-            if (this.reconnect) this.login(process.env.DISCORD_TOKEN).catch(console.error);
+            if (this.reconnect) this.login(process.env.BOT_TOKEN).catch(console.error);
         });
 
-        this.login(process.env.DISCORD_TOKEN).catch(console.error);
+        this.login(process.env.BOT_TOKEN).catch(console.error);
 
         return true;
     }

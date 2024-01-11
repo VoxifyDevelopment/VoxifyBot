@@ -20,7 +20,6 @@
 import 'dotenv/config';
 
 import Logger from './modules/Logger';
-import VoxifyTerminal from './terminal/VoxifyTerminal';
 import ShardManager from './ShardManager';
 import VoxifyClient from './client/VoxifyClient';
 import Cache from './caching/Cache';
@@ -43,13 +42,13 @@ if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
 
 out.debug('Starting VoxifyBot');
 
-
 if (process.env.NODE_ENV !== 'production') {
-    VoxifyTerminal.new(VoxifyClient.new(new Cache()));
-}
-else {
-     let shardManager = ShardManager.new();
-     shardManager.spawn().catch((error) => out.error(error));
+    const bot = VoxifyClient.new(new Cache());
+    bot.shardId = 0;
+    bot.start();
+} else {
+    let shardManager = ShardManager.new();
+    shardManager.spawn().catch((error) => out.error(error));
 }
 
 process.on('exit', () => out.info('Bye! Shutdown complete.'));
