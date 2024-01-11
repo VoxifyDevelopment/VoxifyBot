@@ -54,6 +54,13 @@ export default class VoxifyClient extends Client {
     userContextInteractions: Collection<string, UserContextMenuExecutor> = new Collection();
     messageContextInteractions: Collection<string, any> = new Collection();
 
+    slashCommandInteractionsPremium: Collection<string, SlashCommandExecutor> = new Collection();
+    modalSubmitInteractionsPremium: Collection<string, ModalCommandExecutor> = new Collection();
+    buttonCommandInteractionsPremium: Collection<string, ButtonCommandExecutor> = new Collection();
+    autocompleteInteractionsPremium: Collection<string, any> = new Collection();
+    userContextInteractionsPremium: Collection<string, UserContextMenuExecutor> = new Collection();
+    messageContextInteractionsPremium: Collection<string, any> = new Collection();
+
     constructor(cache: Cache, shardId?: number) {
         super({
             intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
