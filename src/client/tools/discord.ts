@@ -426,9 +426,13 @@ export async function generateTempVoiceControls(
     channel?: TextBasedChannel | VoiceBasedChannel | null
 ) {
     if (!controlsCtx)
-        controlsCtx = (await import(`${__dirname}../../i18n/en-US/controls.json`))?.default || {};
+        controlsCtx =
+            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(cosnole.error))
+                ?.default || {};
     if (!linksCtx)
-        linksCtx = (await import(`${__dirname}../../i18n/en-US/links.json`))?.default || {};
+        linksCtx =
+            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(cosnole.error))
+                ?.default || {};
 
     const finalShow = show && channel;
     const usedLocale = finalShow ? localeGuild : localeUser;
