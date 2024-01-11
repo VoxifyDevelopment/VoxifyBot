@@ -133,7 +133,7 @@ export default class EventManager {
                 this.bot.cache.redis
                     .set(`${this.bot.cachePrefix}.lastRestarted`, Date.now())
                     .catch(() => {});
-                this.bot.out.info(`Shard ${shardId} is ready!`);
+                this.bot.out.info(`Shard ${this.bot.shardId} is ready!`);
             });
         }
 
