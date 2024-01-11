@@ -23,11 +23,11 @@ import { ShardingManager } from 'discord.js';
 export default class ShardManager extends ShardingManager {
     out: Logger;
     constructor() {
-        if (process.env.NODE_ENV !== 'production')
-            throw new Error('You can only use sharding in "NODE_ENV=production" mode');
+        if (process.env.NODE_ENV !== 'production') process.env.SHARDS = '1';
+
         super('./client/index.js', {
             mode: 'process',
-            totalShards: parseInt(process.env.SHARDS || '2') || 2
+            totalShards: parseInt(process.env.SHARDS || '1') || 1
         });
         this.out = new Logger('VoxifyBot', '[ShardManager] »');
         if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {

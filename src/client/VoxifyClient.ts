@@ -41,6 +41,8 @@ export default class VoxifyClient extends Client {
     shardId: number = 0;
     cachePrefix: string = '';
 
+    reconnect: boolean = true;
+
     premiumEnabled: boolean = false;
 
     tools = { discord, general };
@@ -191,7 +193,12 @@ export default class VoxifyClient extends Client {
             throw new Error('Missing environment variables DISCORD_TOKEN');
         }
 
-        this.login(process.env.DISCORD_TOKEN);
+        this.on('disconnect', (event) => {
+            console.error(`Bot disconnected with code ${event.code}.`);
+            if (this.reconnect) this.login(process.env.DISCORD_TOKEN).catch(console.error);
+        });
+
+        this.login(process.env.DISCORD_TOKEN).catch(console.error);
 
         return true;
     }
@@ -205,6 +212,7 @@ export default class VoxifyClient extends Client {
 
     async stop(): Promise<boolean> {
         this.destroy();
+        this.reconnect = false;
         this.out.debug('Client destroyed...');
         return true;
     }

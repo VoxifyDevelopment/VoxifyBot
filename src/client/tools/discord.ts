@@ -39,9 +39,6 @@ import {
 } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
 
-import controlsCtx from '../../i18n/en-US/controls.json';
-import linksCtx from '../../i18n/en-US/links.json';
-
 export default () => {};
 
 /**
@@ -368,6 +365,52 @@ export async function checkTvcArgs(
     return true;
 }
 
+export interface UrlButtonInfo {
+    name: string;
+    emoji: string;
+    url: string;
+}
+
+export interface ButtonTypes {
+    support: UrlButtonInfo;
+    invite: UrlButtonInfo;
+    github: UrlButtonInfo;
+    translate: UrlButtonInfo;
+}
+
+export interface ButtonInfo {
+    name: string;
+    emoji: string;
+    description: string;
+}
+
+export interface ControllerMenu {
+    name: string;
+    description: string;
+    'error-message': string;
+    'success-message': string;
+    buttons: {
+        rename: ButtonInfo;
+        limit: ButtonInfo;
+        bitrate: ButtonInfo;
+        nsfw: ButtonInfo;
+        status: ButtonInfo;
+        kick: ButtonInfo;
+        ban: ButtonInfo;
+        invite: ButtonInfo;
+        clear: ButtonInfo;
+        close: ButtonInfo;
+        lock: ButtonInfo;
+        show: ButtonInfo;
+        hide: ButtonInfo;
+        public: ButtonInfo;
+        private: ButtonInfo;
+    };
+}
+
+let controlsCtx: ControllerMenu;
+let linksCtx: ButtonTypes;
+
 export async function generateTempVoiceControls(
     bot: VoxifyClient,
     interaction:
@@ -382,6 +425,9 @@ export async function generateTempVoiceControls(
     show: boolean,
     channel?: TextBasedChannel | VoiceBasedChannel | null
 ) {
+    if (!controlsCtx) controlsCtx = (await import('../../i18n/en-US/controls.json'))?.default || {};
+    if (!linksCtx) linksCtx = (await import('../../i18n/en-US/links.json'))?.default || {};
+
     const finalShow = show && channel;
     const usedLocale = finalShow ? localeGuild : localeUser;
     let controlsEmbed = await bot.tools.discord.generateEmbed(bot, {
@@ -395,7 +441,7 @@ export async function generateTempVoiceControls(
     const buttons: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
 
-    for (const [key, value] of Object.entries(controlsCtx.buttons)) {
+    for (const [key, value] of Object.entries(controlsCtx)) {
         if (currentRow.components.length === 5) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
