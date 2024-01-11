@@ -93,7 +93,7 @@ export default class EventManager {
         } else {
             this.bot.on('ready', async () => {
                 this.bot.shardId = 0;
-                this.bot.cachePrefix = `${this.bot.user?.id}.${shardId}`;
+                this.bot.cachePrefix = `${this.bot.user?.id}.${this.bot.shardId}`;
 
                 this.bot.user?.setActivity({
                     name: `Users / Voice Channels`,
