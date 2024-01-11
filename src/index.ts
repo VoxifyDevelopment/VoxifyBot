@@ -42,14 +42,8 @@ if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {
 
 out.debug('Starting VoxifyBot');
 
-if (process.env.NODE_ENV !== 'production') {
-    const bot = VoxifyClient.new(new Cache());
-    bot.shardId = 0;
-    bot.start();
-} else {
-    let shardManager = ShardManager.new();
-    shardManager.spawn().catch((error) => out.error(error));
-}
+let shardManager = ShardManager.new();
+shardManager.spawn().catch((error) => out.error(error));
 
 process.on('exit', () => out.info('Bye! Shutdown complete.'));
 process.on('SIGINT', async () => {

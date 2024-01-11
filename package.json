@@ -4,8 +4,7 @@
     "description": "Revolutionize your Discord server with seamless voice channel management. Multilingual support, blazing speed, and advanced features for an unparalleled user experience.",
     "main": "index.js",
     "scripts": {
-        "devStart": "NODE_ENV=development tsx watch src/index.ts",
-        "dev": "NODE_ENV=development tsx src/index.ts",
+        "dev": "npm run build && npm --prefix dist/ start NODE_ENV=development",
         "buildClean": "npm run build:clean && npm run build",
         "build": "npm run build:tsc && npm run build:copy-files && npm run build:install-dependencies",
         "build:min": "npm run build && npm run build:minify",
@@ -53,6 +52,7 @@
         "license-check-and-add": "^4.0.5",
         "prettier": "^3.1.1",
         "terser": "^5.26.0",
+        "ts-node": "^10.9.2",
         "tsx": "^4.7.0",
         "typescript": "^5.3.3"
     }
