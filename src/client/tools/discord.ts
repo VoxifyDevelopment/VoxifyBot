@@ -395,8 +395,7 @@ export async function generateTempVoiceControls(
     const buttons: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
 
-    for (const [key, value] of Object.entries(controlsCtx)) {
-        if (key === 'default') continue;
+    for (const [key, value] of Object.entries(controlsCtx.buttons)) {
         if (currentRow.components.length === 5) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
@@ -422,7 +421,6 @@ export async function generateTempVoiceControls(
     controlsEmbed.addFields(buttonFields);
 
     for (const [key, value] of Object.entries(linksCtx)) {
-        if (key === 'default') continue;
         if (currentRow.components.length >= 2) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
