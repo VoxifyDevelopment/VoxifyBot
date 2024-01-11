@@ -427,11 +427,11 @@ export async function generateTempVoiceControls(
 ) {
     if (!controlsCtx)
         controlsCtx =
-            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(cosnole.error))
+            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error))
                 ?.default || {};
     if (!linksCtx)
         linksCtx =
-            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(cosnole.error))
+            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error))
                 ?.default || {};
 
     const finalShow = show && channel;
