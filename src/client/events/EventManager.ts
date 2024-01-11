@@ -49,8 +49,10 @@ export default class EventManager {
                 shardId
             });
 
-            bot.premiumEnabled = (await premiumCheckAndAdd(bot).catch(console.error)) || false;
-            if (!bot.premiumEnabled) bot.out.debug('Sadly the premium features are disabled');
+            this.bot.premiumEnabled =
+                (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
+            if (!this.bot.premiumEnabled)
+                this.bot.out.debug('Sadly the premium features are disabled');
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
 
