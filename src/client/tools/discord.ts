@@ -428,12 +428,11 @@ export async function generateTempVoiceControls(
             currentRow = new ActionRowBuilder();
         }
 
-        const emoji = bot.translations.translateTo(usedLocale, `links.${key}.emoji`);
         currentRow.addComponents(
             new ButtonBuilder()
-                .setLabel(' ' + bot.translations.translateTo(usedLocale, `links.${key}.name`))
-                .setEmoji(emoji)
-                .setURL(bot.translations.translateTo(usedLocale, `links.${key}.url`))
+                .setLabel(' ' + value.name)
+                .setEmoji(value.emoji)
+                .setURL(value.url)
                 .setStyle(ButtonStyle.Link)
         );
     }
