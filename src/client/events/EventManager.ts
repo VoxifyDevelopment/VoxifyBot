@@ -57,6 +57,18 @@ export default class EventManager {
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
 
+            if (!this.bot.premiumEnabled) {
+                this.bot.on('voiceStateUpdate', async (oldState, newState) => {
+                    try {
+                        VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
+                            this.bot.out.logError(err)
+                        );
+                    } catch (err) {
+                        this.bot.out.error(err);
+                    }
+                });
+            }
+
             let commandData = [
                 ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
                 ...this.bot.userContextInteractions.map((c) => c.data(this.bot))
@@ -106,17 +118,6 @@ export default class EventManager {
                 `Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`
             );
         });
-
-        if (!bot.premiumEnabled)
-            this.bot.on('voiceStateUpdate', async (oldState, newState) => {
-                try {
-                    VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
-                        this.bot.out.logError(err)
-                    );
-                } catch (err) {
-                    this.bot.out.error(err);
-                }
-            });
     }
 }
 
