@@ -365,51 +365,8 @@ export async function checkTvcArgs(
     return true;
 }
 
-export interface UrlButtonInfo {
-    name: string;
-    emoji: string;
-    url: string;
-}
-
-export interface ButtonTypes {
-    support: UrlButtonInfo;
-    invite: UrlButtonInfo;
-    github: UrlButtonInfo;
-    translate: UrlButtonInfo;
-}
-
-export interface ButtonInfo {
-    name: string;
-    emoji: string;
-    description: string;
-}
-
-export interface ControllerMenu {
-    name: string;
-    description: string;
-    'error-message': string;
-    'success-message': string;
-    buttons: {
-        rename: ButtonInfo;
-        limit: ButtonInfo;
-        bitrate: ButtonInfo;
-        nsfw: ButtonInfo;
-        status: ButtonInfo;
-        kick: ButtonInfo;
-        ban: ButtonInfo;
-        invite: ButtonInfo;
-        clear: ButtonInfo;
-        close: ButtonInfo;
-        lock: ButtonInfo;
-        show: ButtonInfo;
-        hide: ButtonInfo;
-        public: ButtonInfo;
-        private: ButtonInfo;
-    };
-}
-
-let controlsCtx: ControllerMenu;
-let linksCtx: ButtonTypes;
+let controlsCtx = null;
+let linksCtx = null;
 
 export async function generateTempVoiceControls(
     bot: VoxifyClient,
@@ -425,19 +382,6 @@ export async function generateTempVoiceControls(
     show: boolean,
     channel?: TextBasedChannel | VoiceBasedChannel | null
 ) {
-    if (!controlsCtx) {
-        controlsCtx =
-            (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error)) ||
-            {};
-
-        console.log(controlsCtx);
-    }
-
-    if (!linksCtx) {
-        linksCtx =
-            (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error)) || {};
-    }
-
     const finalShow = show && channel;
     const usedLocale = finalShow ? localeGuild : localeUser;
     let controlsEmbed = await bot.tools.discord.generateEmbed(bot, {
@@ -451,7 +395,10 @@ export async function generateTempVoiceControls(
     const buttons: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
 
-    for (const [key, value] of Object.entries(controlsCtx)) {
+    for (const [key, value] of Object.entries(
+        (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error)) || {}
+    )) {
+        if (key === 'default') continue;
         if (currentRow.components.length === 5) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
@@ -476,17 +423,21 @@ export async function generateTempVoiceControls(
 
     controlsEmbed.addFields(buttonFields);
 
-    for (const [key, value] of Object.entries(linksCtx)) {
+    for (const [key, value] of Object.entries(
+        (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error)) || {}
+    )) {
+        if (key === 'default') continue;
         if (currentRow.components.length >= 2) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
         }
 
+        const emoji = bot.translations.translateTo(usedLocale, `links.${key}.emoji`);
         currentRow.addComponents(
             new ButtonBuilder()
-                .setLabel(' ' + value.name)
-                .setEmoji(value.emoji)
-                .setURL(value.url)
+                .setLabel(' ' + bot.translations.translateTo(usedLocale, `links.${key}.name`))
+                .setEmoji(emoji)
+                .setURL(bot.translations.translateTo(usedLocale, `links.${key}.url`))
                 .setStyle(ButtonStyle.Link)
         );
     }
