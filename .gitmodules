@@ -1,3 +1,6 @@
 [submodule "src/i18n"]
 	path = src/i18n
 	url = git@github.com:VoxifyDevelopment/VoxifyBot-i18n.git
+[submodule "src/client/premium"]
+	path = src/client/premium
+	url = git@github.com:VoxifyDevelopment/VoxifyBotPremium.git
