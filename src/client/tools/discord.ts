@@ -39,6 +39,9 @@ import {
 } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
 
+import controlsCtx from '../../i18n/en-US/controls.json';
+import linksCtx from '../../i18n/en-US/links.json';
+
 export default () => {};
 
 /**
@@ -365,9 +368,6 @@ export async function checkTvcArgs(
     return true;
 }
 
-let controlsCtx = null;
-let linksCtx = null;
-
 export async function generateTempVoiceControls(
     bot: VoxifyClient,
     interaction:
@@ -395,9 +395,7 @@ export async function generateTempVoiceControls(
     const buttons: ActionRowBuilder<ButtonBuilder>[] = [];
     let currentRow: ActionRowBuilder<ButtonBuilder> = new ActionRowBuilder();
 
-    for (const [key, value] of Object.entries(
-        (await import(`${__dirname}/../../i18n/en-US/controls.json`).catch(console.error)) || {}
-    )) {
+    for (const [key, value] of Object.entries(controlsCtx)) {
         if (key === 'default') continue;
         if (currentRow.components.length === 5) {
             buttons.push(currentRow);
@@ -423,9 +421,7 @@ export async function generateTempVoiceControls(
 
     controlsEmbed.addFields(buttonFields);
 
-    for (const [key, value] of Object.entries(
-        (await import(`${__dirname}/../../i18n/en-US/links.json`).catch(console.error)) || {}
-    )) {
+    for (const [key, value] of Object.entries(linksCtx)) {
         if (key === 'default') continue;
         if (currentRow.components.length >= 2) {
             buttons.push(currentRow);
