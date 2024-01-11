@@ -11,7 +11,8 @@
         "**/*.txt",
         "**/*.md",
         "**/*.yml",
-        "**/*.yaml"
+        "**/*.yaml",
+        "Dockerfile"
     ],
     "license": "HEADER.txt",
     "licenseFormats": {
