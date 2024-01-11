@@ -18,17 +18,15 @@
  */
 
 import {
-    ApplicationCommandType,
     ButtonInteraction,
     CommandInteraction,
-    ContextMenuCommandBuilder,
     ModalSubmitInteraction,
-    SlashCommandBuilder,
     UserContextMenuCommandInteraction
 } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
 import Executor from '../executors/Executor';
 import VoiceStateUpdateEvent from './VoiceStateUpdateEvent';
+import premiumCheckAndAdd from '../PremiumFeatures';
 
 export default class EventManager {
     private bot: VoxifyClient;
@@ -50,6 +48,9 @@ export default class EventManager {
                 type: this.bot.tools.discord.resolveActivityType('watching'),
                 shardId
             });
+
+            const premium = await premiumCheckAndAdd(bot).catch(console.error);
+            if (!premium) bot.out.debug('Sadly the premium features are disabled');
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
 
