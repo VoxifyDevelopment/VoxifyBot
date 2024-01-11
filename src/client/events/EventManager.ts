@@ -124,7 +124,7 @@ export default class EventManager {
                     ...this.bot.userContextInteractions.map((c) => c.data(this.bot))
                 ];
 
-                this.bot.application?.commands.set(commandData);
+                this.bot.application?.commands.set(commandData).catch(console.error);
 
                 this.bot.out.debug(
                     `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
