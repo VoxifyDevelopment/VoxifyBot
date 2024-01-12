@@ -48,7 +48,7 @@ export default class btn implements ButtonCommandExecutor {
             !(await bot.tools.discord.checkTvcArgs(
                 localeName,
                 resolvedArgs,
-                bot.translations.translateTo(localeName, 'buttons.close.name'),
+                bot.translations.translateTo(localeName, 'buttons.limit.name'),
                 bot,
                 interaction,
                 true,
@@ -182,7 +182,7 @@ export default class btn implements ButtonCommandExecutor {
                                 .setLabel(
                                     bot.translations.translateTo(
                                         localeName,
-                                        'buttons.limit.modal.label'
+                                        'buttons.limit.modal.input'
                                     )
                                 )
                                 .setValue('' + channel?.userLimit || '')

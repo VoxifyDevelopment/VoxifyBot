@@ -42,7 +42,7 @@ export default class btn implements ButtonCommandExecutor {
             !(await bot.tools.discord.checkTvcArgs(
                 localeName,
                 resolvedArgs,
-                bot.translations.translateTo(localeName, 'buttons.close.name'),
+                bot.translations.translateTo(localeName, 'buttons.hide.name'),
                 bot,
                 interaction,
                 true,

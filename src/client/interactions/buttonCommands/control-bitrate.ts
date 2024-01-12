@@ -26,6 +26,8 @@ import {
 } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
+const rateMultiplier: number = 1000;
+
 export default class btn implements ButtonCommandExecutor {
     async execute(event: ButtonCommandEvent) {
         const { bot, interaction } = event;
@@ -48,7 +50,7 @@ export default class btn implements ButtonCommandExecutor {
             !(await bot.tools.discord.checkTvcArgs(
                 localeName,
                 resolvedArgs,
-                bot.translations.translateTo(localeName, 'buttons.close.name'),
+                bot.translations.translateTo(localeName, 'buttons.bitrate.name'),
                 bot,
                 interaction,
                 true,
@@ -132,7 +134,7 @@ export default class btn implements ButtonCommandExecutor {
 
                 channel
                     ?.setBitrate(
-                        newRate,
+                        newRate * rateMultiplier,
                         `TempVoice | bitrate change requested [by ${member.user.username}] [from ${channel.bitrate}] [to ${newRate}]`
                     )
                     .catch(console.error);
@@ -186,10 +188,10 @@ export default class btn implements ButtonCommandExecutor {
                                 .setLabel(
                                     bot.translations.translateTo(
                                         localeName,
-                                        'buttons.bitrate.modal.label'
+                                        'buttons.bitrate.modal.input'
                                     )
                                 )
-                                .setValue('' + channel?.bitrate || '')
+                                .setValue('' + (channel?.bitrate || 64000) / rateMultiplier)
                         )
                     )
             )

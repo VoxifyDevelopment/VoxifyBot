@@ -49,7 +49,7 @@ export default class TeamList implements ButtonCommandExecutor {
             !(await bot.tools.discord.checkTvcArgs(
                 localeName,
                 resolvedArgs,
-                bot.translations.translateTo(localeName, 'buttons.close.name'),
+                bot.translations.translateTo(localeName, 'buttons.status.name'),
                 bot,
                 interaction,
                 true,
