@@ -17,7 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionFlagsBits } from 'discord.js';
+import {
+    ActionRowBuilder,
+    GuildMember,
+    PermissionFlagsBits,
+    UserSelectMenuBuilder,
+    UserSelectMenuInteraction
+} from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -53,11 +59,144 @@ export default class btn implements ButtonCommandExecutor {
             return false;
 
         const { member, channel } = resolvedArgs;
+        if (!channel) return true;
 
-        await interaction
+        const localizedName = bot.translations.translateTo(
+            localeName,
+            'context.user.invite-user.name'
+        );
+
+        let invites = await channel.fetchInvites(true);
+        invites = invites.filter((i) => i.inviterId === bot.user?.id);
+
+        let invite =
+            invites.first() ||
+            (await channel
+                .createInvite({
+                    reason: `TempVoice | invite requested by [user ${member.user.username}]`,
+                    temporary: false
+                })
+                .catch(() => {}));
+
+        if (!invite || typeof invite === 'function') {
+            const feedback = bot.translations.translateTo(localeName, 'feedback.error');
+
+            interaction
+                .reply({
+                    embeds: [
+                        await bot.tools.discord.generateEmbed(bot, {
+                            type: 'error',
+                            content: `${feedback} ${localizedName}`,
+                            guild: interaction.guild || undefined,
+                            user: interaction.user,
+                            timestamp: true
+                        })
+                    ],
+                    ephemeral: true
+                })
+                .catch(console.error);
+
+            return false;
+        }
+
+        interaction.channel
+            ?.awaitMessageComponent({
+                filter: (collected) =>
+                    collected.isUserSelectMenu() &&
+                    collected.customId === 'select-invite-' + member.id,
+                time: 60000
+            })
+            .then(async (selectInteraction) => {
+                selectInteraction = selectInteraction as UserSelectMenuInteraction;
+                const toInvite = selectInteraction.members;
+                let usersInvited = [];
+                let usersNotInvited = [];
+
+                for (let [id, managedMember] of toInvite) {
+                    if (!(managedMember instanceof GuildMember)) {
+                        let mem =
+                            channel?.guild.members.cache.get(id) ||
+                            (await channel?.guild.members.fetch(id).catch(console.error));
+                        if (!mem || typeof mem === 'function') {
+                            usersNotInvited.push(id);
+                            continue;
+                        }
+                        managedMember = mem;
+                    }
+
+                    if (!channel) continue;
+
+                    let targetLocale = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
+
+                    const sent = await managedMember
+                        .send({
+                            content: invite?.url,
+                            embeds: [
+                                await bot.tools.discord.generateEmbed(bot, {
+                                    type: 'success',
+                                    content: `${member.displayName} ${bot.translations.translateTo(
+                                        targetLocale,
+                                        'context.user.invite-user.name'
+                                    )}`,
+                                    guild: interaction.guild || undefined,
+                                    user: interaction.user,
+                                    timestamp: true
+                                })
+                            ]
+                        })
+                        .catch(() => {});
+
+                    if (sent) {
+                        usersInvited.push(managedMember.user.tag);
+                    } else {
+                        usersNotInvited.push(managedMember.user.tag);
+                    }
+                }
+
+                const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+
+                selectInteraction
+                    .reply({
+                        embeds: [
+                            await bot.tools.discord.generateEmbed(bot, {
+                                type: 'success',
+                                title: `${feedback} ${localizedName}`,
+                                content: `
+${usersNotInvited.length > 0 ? `➖ ${usersNotInvited.join(', ')}` : ''}
+${usersInvited.length > 0 ? `➕ ${usersInvited.join(', ')}` : ''}
+                                `,
+                                guild: interaction.guild || undefined,
+                                user: interaction.user,
+                                timestamp: true
+                            })
+                        ],
+                        ephemeral: true
+                    })
+                    .catch(console.error);
+            });
+
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+
+        interaction
             .reply({
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        content: `${feedback} ${localizedName}`,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
                 ephemeral: true,
-                content: 'not implemented yet'
+                components: [
+                    new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
+                        new UserSelectMenuBuilder()
+                            .setMinValues(1)
+                            .setMaxValues(3)
+                            .setCustomId('select-invite-' + member.id)
+                    )
+                ]
             })
             .catch(console.error);
 
