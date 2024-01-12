@@ -54,10 +54,30 @@ export default class btn implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
+        const activate = !(channel?.nsfw || false);
+
+        const key = bot.translations.translateTo(localeName, 'buttons.nsfw.name');
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+        const content = bot.translations.translateTo(
+            localeName,
+            activate ? 'buttons.nsfw.activated' : 'buttons.nsfw.deactivated'
+        );
+
+        channel?.setNSFW(activate).catch(console.error);
+
+        interaction
             .reply({
-                ephemeral: true,
-                content: 'not implemented yet'
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        title: `${feedback} ${key}`,
+                        content,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
             })
             .catch(console.error);
 
