@@ -149,7 +149,7 @@ export default class PingCommand implements SlashCommandExecutor {
                                     text: topic
                                 },
                                 description,
-                                timestamp: new Date().toUTCString(),
+                                timestamp: new Date().toISOString(),
                                 author: {
                                     name: interaction.user.username,
                                     icon_url: interaction.user.displayAvatarURL()
