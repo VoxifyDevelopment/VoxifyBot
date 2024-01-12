@@ -54,10 +54,33 @@ export default class btn implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
+        if (!channel) return false;
+
+        const bulked = await channel.bulkDelete(100).catch(() => {});
+        const count = bulked?.size || 0;
+
+        const key = bot.translations.translateTo(localeName, 'buttons.clear.name');
+        const feedback = bot.translations.translateTo(
+            localeName,
+            count > 0 ? 'feedback.success' : 'feedback.warning'
+        );
+        const content = bot.translations.translateTo(localeName, 'buttons.clear.success', {
+            count
+        });
+
+        interaction
             .reply({
-                ephemeral: true,
-                content: 'not implemented yet'
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: count > 0 ? 'success' : 'warning',
+                        title: `${feedback} ${key}`,
+                        content,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
             })
             .catch(console.error);
 
