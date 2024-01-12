@@ -122,8 +122,8 @@ export default class btn implements ButtonCommandExecutor {
                                 type: 'success',
                                 title: `${feedback} ${localizedName}`,
                                 content: `
-${usersBanned.length > 0 ? `➖ ${usersBanned.join(',\n➖')}` : ''}
-${usersNotBanned.length > 0 ? `➕ ${usersNotBanned.join(',\n➕')}` : ''}
+${usersBanned.length > 0 ? `✔️ ${usersBanned.join(',\n✔️')}` : ''}
+${usersNotBanned.length > 0 ? `❌ ${usersNotBanned.join(',\n❌')}` : ''}
                                 `,
                                 guild: interaction.guild || undefined,
                                 user: interaction.user,

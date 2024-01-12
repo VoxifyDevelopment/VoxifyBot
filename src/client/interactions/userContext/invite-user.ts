@@ -113,7 +113,7 @@ export default class context implements UserContextMenuExecutor {
                         await bot.tools.discord.generateEmbed(bot, {
                             type: 'error',
                             title: `${feedback} ${localizedName}`,
-                            content: `${target.displayName} | <@!${target.id}>`,
+                            content: `❌ ${target.displayName} | <@!${target.id}>`,
                             guild: interaction.guild || undefined,
                             user: interaction.user,
                             timestamp: true
@@ -143,7 +143,7 @@ export default class context implements UserContextMenuExecutor {
                         await bot.tools.discord.generateEmbed(bot, {
                             type: 'warning',
                             title: `${feedback} ${localizedName}`,
-                            content: `DM ${target.displayName} | <@!${target.id}>`,
+                            content: `❌ DM ${target.displayName} | <@!${target.id}>`,
                             guild: interaction.guild || undefined,
                             user: interaction.user,
                             timestamp: true
@@ -164,7 +164,7 @@ export default class context implements UserContextMenuExecutor {
                     await bot.tools.discord.generateEmbed(bot, {
                         type: 'success',
                         title: `${feedback} ${localizedName}`,
-                        content: `${target.displayName} | <@!${target.id}>`,
+                        content: `✔️ ${target.displayName} | <@!${target.id}>`,
                         guild: interaction.guild || undefined,
                         user: interaction.user,
                         timestamp: true

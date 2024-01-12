@@ -124,7 +124,7 @@ export async function generateEmbed(
     // Set the description, footer, thumbnail, and URL for the embed
     embed.setDescription(options.content);
     embed.setFooter({
-        text: `VoxifyBot | ShardId: ${bot.shardId}${
+        text: `VoxifyBot | Shard: ${bot.shardId}${
             options.footerAddition ? ` | ${options.footerAddition}` : ''
         }`,
         iconURL:
@@ -409,10 +409,10 @@ export async function generateTempVoiceControls(
         );
 
         buttonFields.push({
-            name: `[ ${emoji} ] «${bot.translations.translateTo(
+            name: `[ ${emoji} ] - ${bot.translations.translateTo(
                 usedLocale,
                 `controls.buttons.${key}.name`
-            )}»`,
+            )}`,
             value: bot.translations.translateTo(usedLocale, `controls.buttons.${key}.description`),
             inline: true
         });
@@ -428,7 +428,7 @@ export async function generateTempVoiceControls(
 
         currentRow.addComponents(
             new ButtonBuilder()
-                .setLabel(' ' + value.name)
+                .setLabel(value.name)
                 .setEmoji(value.emoji)
                 .setURL(value.url)
                 .setStyle(ButtonStyle.Link)
