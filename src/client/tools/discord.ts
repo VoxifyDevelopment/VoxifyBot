@@ -421,7 +421,7 @@ export async function generateTempVoiceControls(
     controlsEmbed.addFields(buttonFields);
 
     for (const [key, value] of Object.entries(linksCtx)) {
-        if (currentRow.components.length >= 2) {
+        if (currentRow.components.length >= 3) {
             buttons.push(currentRow);
             currentRow = new ActionRowBuilder();
         }
