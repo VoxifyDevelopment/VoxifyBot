@@ -102,7 +102,7 @@ export default class PingCommand implements SlashCommandExecutor {
                             .setEmoji(
                                 bot.translations.translateTo(
                                     localeName,
-                                    'commands.support.s-button-url'
+                                    'commands.support.s-button-emoji'
                                 )
                             )
                             .setLabel(
