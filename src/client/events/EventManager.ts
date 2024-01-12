@@ -75,7 +75,8 @@ export default class EventManager {
 
                 let commandData = [
                     ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot))
+                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot)),
+                    ...this.bot.messageContextInteractions.map((c) => c.data(this.bot))
                 ];
 
                 this.bot.application?.commands.set(commandData);
