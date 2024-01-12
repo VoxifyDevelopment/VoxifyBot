@@ -20,6 +20,7 @@
 import {
     ButtonInteraction,
     CommandInteraction,
+    MessageContextMenuCommandInteraction,
     ModalSubmitInteraction,
     UserContextMenuCommandInteraction
 } from 'discord.js';
@@ -36,6 +37,8 @@ export default class EventManager {
     private slash: _CommandInteractionEventExecutor = new _CommandInteractionEventExecutor();
     private userContext: _UserContextMenuInteractionEventExecutor =
         new _UserContextMenuInteractionEventExecutor();
+    private messageContext: _MessageContextMenuInteractionEventExecutor =
+        new _MessageContextMenuInteractionEventExecutor();
 
     constructor(bot: VoxifyClient) {
         this.bot = bot;
@@ -121,7 +124,8 @@ export default class EventManager {
 
                 let commandData = [
                     ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot))
+                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot)),
+                    ...this.bot.messageContextInteractions.map((c) => c.data(this.bot))
                 ];
 
                 this.bot.application?.commands.set(commandData).catch(console.error);
@@ -146,6 +150,10 @@ export default class EventManager {
                     this.modal.execute({ bot: this.bot, interaction }).catch(console.error);
                 } else if (interaction.isUserContextMenuCommand()) {
                     this.userContext.execute({ bot: this.bot, interaction }).catch(console.error);
+                } else if (interaction.isMessageContextMenuCommand()) {
+                    this.messageContext
+                        .execute({ bot: this.bot, interaction })
+                        .catch(console.error);
                 } else if (interaction.isChatInputCommand()) {
                     this.slash.execute({ bot: this.bot, interaction }).catch(console.error);
                 }
@@ -181,6 +189,11 @@ export interface CommandInteractionEvent {
 export interface UserContextMenuInteractionEvent {
     bot: VoxifyClient;
     interaction: UserContextMenuCommandInteraction;
+}
+
+export interface MessageContextMenuInteractionEvent {
+    bot: VoxifyClient;
+    interaction: MessageContextMenuCommandInteraction;
 }
 
 export interface ModalInteractionEvent {
@@ -237,6 +250,22 @@ export class _UserContextMenuInteractionEventExecutor
         try {
             return (
                 event.bot.userContextInteractions
+                    .get(event.interaction.commandName)
+                    ?.execute({ ...event }) || false
+            );
+        } catch (err) {
+            return false;
+        }
+    }
+}
+
+export class _MessageContextMenuInteractionEventExecutor
+    implements Executor<MessageContextMenuInteractionEvent>
+{
+    async execute(event: MessageContextMenuInteractionEvent): Promise<boolean> {
+        try {
+            return (
+                event.bot.messageContextInteractions
                     .get(event.interaction.commandName)
                     ?.execute({ ...event }) || false
             );

@@ -32,6 +32,7 @@ import ButtonCommandExecutor from './executors/ButtonCommandExecutor';
 import ModalCommandExecutor from './executors/ModalCommandExecutor';
 import SlashCommandExecutor from './executors/SlashCommandExecutor';
 import UserContextMenuExecutor from './executors/UserContextMenuExecutor';
+import MessageContextMenuExecutor from './executors/MessageContextMenuExecutor';
 
 export default class VoxifyClient extends Client {
     initialized: boolean = false;
@@ -54,14 +55,15 @@ export default class VoxifyClient extends Client {
     buttonCommandInteractions: Collection<string, ButtonCommandExecutor> = new Collection();
     autocompleteInteractions: Collection<string, any> = new Collection();
     userContextInteractions: Collection<string, UserContextMenuExecutor> = new Collection();
-    messageContextInteractions: Collection<string, any> = new Collection();
+    messageContextInteractions: Collection<string, MessageContextMenuExecutor> = new Collection();
 
     slashCommandInteractionsPremium: Collection<string, SlashCommandExecutor> = new Collection();
     modalSubmitInteractionsPremium: Collection<string, ModalCommandExecutor> = new Collection();
     buttonCommandInteractionsPremium: Collection<string, ButtonCommandExecutor> = new Collection();
     autocompleteInteractionsPremium: Collection<string, any> = new Collection();
     userContextInteractionsPremium: Collection<string, UserContextMenuExecutor> = new Collection();
-    messageContextInteractionsPremium: Collection<string, any> = new Collection();
+    messageContextInteractionsPremium: Collection<string, MessageContextMenuExecutor> =
+        new Collection();
 
     constructor(cache: Cache, shardId?: number) {
         super({
@@ -184,6 +186,27 @@ export default class VoxifyClient extends Client {
 
                     this.userContextInteractions.set(name, inst);
                     this.out.debug(`Loaded context.user.${file}`);
+                })
+                .catch(console.error);
+        }
+
+        const messageContextFiles = fs.readdirSync(`${__dirname}/interactions/messageContext`);
+        for (const file of messageContextFiles) {
+            if (file.startsWith(`_`) || (!file.endsWith(`.ts`) && !file.endsWith(`.js`))) continue;
+            const modulePath: string = `${__dirname}/interactions/messageContext/${file}`;
+            import(modulePath)
+                .then((props) => {
+                    let inst = new props.default();
+                    let { name } = inst;
+                    if (!name) {
+                        name = file.split('.')[0];
+                    }
+
+                    if (inst.id && typeof inst.id == 'function') name = inst.id(this);
+                    else if (inst.id && typeof inst.id == 'string') name = inst.id;
+
+                    this.messageContextInteractions.set(name, inst);
+                    this.out.debug(`Loaded context.message.${file}`);
                 })
                 .catch(console.error);
         }
