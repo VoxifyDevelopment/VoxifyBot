@@ -130,7 +130,7 @@ export default class context implements UserContextMenuExecutor {
 
         const sent = await target
             .send({
-                content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite.url}`
+                content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite?.url}`
             })
             .catch(() => {});
 

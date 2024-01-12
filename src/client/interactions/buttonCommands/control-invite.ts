@@ -130,7 +130,7 @@ export default class btn implements ButtonCommandExecutor {
 
                     const sent = await managedMember
                         .send({
-                            content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite.url}`
+                            content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite?.url}`
                         })
                         .catch(() => {});
 
