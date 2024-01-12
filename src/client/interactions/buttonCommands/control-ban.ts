@@ -115,7 +115,7 @@ export default class btn implements ButtonCommandExecutor {
                     'context.user.ban-user.name'
                 );
 
-                interaction
+                selectInteraction
                     .reply({
                         embeds: [
                             await bot.tools.discord.generateEmbed(bot, {
