@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Client, Collection, GatewayIntentBits, SlashCommandBuilder } from 'discord.js';
+import { Client, Collection, GatewayIntentBits, Partials, SlashCommandBuilder } from 'discord.js';
 
 import * as discord from './tools/discord';
 import * as general from './tools/general';
@@ -65,8 +65,13 @@ export default class VoxifyClient extends Client {
 
     constructor(cache: Cache, shardId?: number) {
         super({
-            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
-            partials: []
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMembers,
+                GatewayIntentBits.GuildVoiceStates,
+                GatewayIntentBits.GuildPresences
+            ],
+            partials: [Partials.GuildMember, Partials.User]
         });
         this.out = new Logger('VoxifyBot', shardId !== undefined ? `[Shard: ${shardId || 0}]` : '');
         if (process.env.NODE_ENV && process.env.NODE_ENV != 'production') {

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ChannelType, PermissionFlagsBits, VoiceState } from 'discord.js';
+import { ActivityType, ChannelType, PermissionFlagsBits, VoiceState } from 'discord.js';
 import VoxifyClient from '../VoxifyClient';
 
 export default class VoiceStateUpdateEvent {
@@ -72,12 +72,43 @@ export default class VoiceStateUpdateEvent {
 
             if (!container || typeof container === 'function') return false;
 
-            let channel = await guild.channels.create({
-                name: member.displayName,
+            let channelName = member.displayName;
+
+            if (member.presence && member.presence.activities.length > 0) {
+                let found: boolean = false;
+                for (let activity of member.presence.activities) {
+                    if (activity.type === ActivityType.Playing) {
+                        channelName = '🎮 ' + activity.name;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                    for (let activity of member.presence.activities) {
+                        if (activity.type === ActivityType.Listening) {
+                            channelName = '🎵 ' + activity.name;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                if (!found)
+                    for (let activity of member.presence.activities) {
+                        if (activity.type === ActivityType.Watching) {
+                            channelName = '📺 ' + activity.name;
+                            found = true;
+                            break;
+                        }
+                    }
+            }
+
+            const channel = await guild.channels.create({
+                name: channelName,
                 parent: containerCached,
                 type: ChannelType.GuildVoice,
                 reason: `TempVoice | new channel needed for [user ${member.user.username}]`
             });
+
             bot.out.debug(`TempVoice | new channel needed for [user ${member.user.username}]`);
 
             bot.cache.redis.set(`tvc.${guild.id}.${channel.id}`, member.id).catch(console.error);
