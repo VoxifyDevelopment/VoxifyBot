@@ -82,7 +82,7 @@ export default class context implements UserContextMenuExecutor {
                 interaction,
                 true,
                 true,
-                PermissionFlagsBits.MoveMembers,
+                PermissionFlagsBits.ManageChannels + PermissionFlagsBits.MoveMembers,
                 target
             ))
         )

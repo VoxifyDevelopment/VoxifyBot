@@ -17,7 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionFlagsBits } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ChannelFlags,
+    GuildMember,
+    PermissionFlagsBits,
+    UserSelectMenuBuilder,
+    UserSelectMenuInteraction
+} from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -54,10 +61,102 @@ export default class btn implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
+        interaction.channel
+            ?.awaitMessageComponent({
+                filter: (collected) =>
+                    collected.isUserSelectMenu() &&
+                    collected.customId === 'select-kick-' + member.id,
+                time: 60000
+            })
+            .then(async (selectInteraction) => {
+                selectInteraction = selectInteraction as UserSelectMenuInteraction;
+                const toBan = selectInteraction.members;
+                let usersBanned = [];
+                let usersNotBanned = [];
+
+                for (let [id, managedMember] of toBan) {
+                    if (!(managedMember instanceof GuildMember)) {
+                        let mem =
+                            channel?.guild.members.cache.get(id) ||
+                            (await channel?.guild.members.fetch(id).catch(console.error));
+                        if (!mem || typeof mem === 'function') {
+                            usersNotBanned.push(id);
+                            continue;
+                        }
+                        managedMember = mem;
+                    }
+
+                    if (!channel) continue;
+
+                    if (
+                        managedMember.permissions.has(PermissionFlagsBits.Administrator) ||
+                        managedMember.permissions.has(PermissionFlagsBits.ManageGuild) ||
+                        managedMember.permissionsIn(channel).has(PermissionFlagsBits.ManageChannels)
+                    ) {
+                        usersNotBanned.push(managedMember.user.tag);
+                        continue;
+                    }
+
+                    if (channel.members.has(managedMember.id)) {
+                        managedMember.voice.disconnect(
+                            `TempVoice | kick requested by [user ${member.user.username}]`
+                        );
+                    }
+                    usersBanned.push(managedMember.user.tag);
+                }
+
+                const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+                const localizedName = bot.translations.translateTo(
+                    localeName,
+                    'context.user.kick-user.name'
+                );
+
+                interaction
+                    .reply({
+                        embeds: [
+                            await bot.tools.discord.generateEmbed(bot, {
+                                type: 'success',
+                                title: `${feedback} ${localizedName}`,
+                                content: `
+${usersBanned.length > 0 ? `➖ ${usersBanned.join(',\n➖')}` : ''}
+${usersNotBanned.length > 0 ? `➕ ${usersNotBanned.join(',\n➕')}` : ''}
+                                `,
+                                guild: interaction.guild || undefined,
+                                user: interaction.user,
+                                timestamp: true
+                            })
+                        ],
+                        ephemeral: true
+                    })
+                    .catch(console.error);
+            });
+
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+        const localizedName = bot.translations.translateTo(
+            localeName,
+            'context.user.kick-user.name'
+        );
+
+        interaction
             .reply({
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        content: `${feedback} ${localizedName}`,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
                 ephemeral: true,
-                content: 'not implemented yet'
+                components: [
+                    new ActionRowBuilder<UserSelectMenuBuilder>().addComponents(
+                        new UserSelectMenuBuilder()
+                            .setMinValues(1)
+                            .setMaxValues(3)
+                            .setCustomId('select-kick-' + member.id)
+                    )
+                ]
             })
             .catch(console.error);
 
