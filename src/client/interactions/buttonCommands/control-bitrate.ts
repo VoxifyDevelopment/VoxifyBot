@@ -17,7 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionFlagsBits } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ModalBuilder,
+    PermissionFlagsBits,
+    TextInputBuilder,
+    TextInputStyle
+} from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -54,11 +60,139 @@ export default class btn implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
-            .reply({
-                ephemeral: true,
-                content: 'not implemented yet'
+        interaction
+            .awaitModalSubmit({
+                filter: (interaction) => interaction.customId === 'modal-bitrate-' + member.id,
+                time: 60000
             })
+            .then(async (modalInteraction) => {
+                if (!modalInteraction.guild) return false;
+                const field = modalInteraction.fields.fields.find(
+                    (f) => f.customId === 'new-bitrate'
+                );
+                const newRate: number = parseInt(field?.value || '100') || 100;
+
+                if (newRate < 8 || newRate > 96) {
+                    const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
+                    const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+                    const content = bot.translations.translateTo(
+                        localeName,
+                        'buttons.bitrate.wrong-input',
+                        {
+                            bitrate: `${newRate}`
+                        }
+                    );
+
+                    modalInteraction
+                        .reply({
+                            embeds: [
+                                await bot.tools.discord.generateEmbed(bot, {
+                                    type: 'warning',
+                                    title: `${feedback} ${key}`,
+                                    content,
+                                    guild: interaction.guild || undefined,
+                                    user: interaction.user,
+                                    timestamp: true
+                                })
+                            ],
+                            ephemeral: true
+                        })
+                        .catch(console.error);
+                    return;
+                }
+
+                if (newRate === channel?.bitrate) {
+                    const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
+                    const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+                    const content = bot.translations.translateTo(
+                        localeName,
+                        'buttons.bitrate.already',
+                        {
+                            bitrate: `${newRate}`
+                        }
+                    );
+
+                    modalInteraction
+                        .reply({
+                            embeds: [
+                                await bot.tools.discord.generateEmbed(bot, {
+                                    type: 'warning',
+                                    title: `${feedback} ${key}`,
+                                    content,
+                                    guild: interaction.guild || undefined,
+                                    user: interaction.user,
+                                    timestamp: true
+                                })
+                            ],
+                            ephemeral: true
+                        })
+                        .catch(console.error);
+                    return;
+                }
+
+                channel
+                    ?.setBitrate(
+                        newRate,
+                        `TempVoice | bitrate change requested [by ${member.user.username}] [from ${channel.bitrate}] [to ${newRate}]`
+                    )
+                    .catch(console.error);
+
+                const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
+                const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+                const content = bot.translations.translateTo(
+                    localeName,
+                    'buttons.bitrate.success',
+                    {
+                        bitrate: `${newRate}`
+                    }
+                );
+
+                modalInteraction
+                    .reply({
+                        embeds: [
+                            await bot.tools.discord.generateEmbed(bot, {
+                                type: 'success',
+                                title: `${feedback} ${key}`,
+                                content,
+                                guild: interaction.guild || undefined,
+                                user: interaction.user,
+                                timestamp: true
+                            })
+                        ],
+                        ephemeral: true
+                    })
+                    .catch(console.error);
+            })
+            .catch(console.error);
+
+        interaction
+            .showModal(
+                new ModalBuilder()
+                    .setTitle(bot.translations.translateTo(localeName, 'buttons.bitrate.name'))
+                    .setCustomId('modal-bitrate-' + member.id)
+                    .addComponents(
+                        new ActionRowBuilder<TextInputBuilder>().addComponents(
+                            new TextInputBuilder()
+                                .setMinLength(1)
+                                .setMaxLength(2)
+                                .setCustomId('new-bitrate')
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder(
+                                    bot.translations.translateTo(
+                                        localeName,
+                                        'buttons.bitrate.modal.placeholder'
+                                    )
+                                )
+                                .setLabel(
+                                    bot.translations.translateTo(
+                                        localeName,
+                                        'buttons.bitrate.modal.label'
+                                    )
+                                )
+                                .setValue('' + channel?.bitrate || '')
+                        )
+                    )
+            )
             .catch(console.error);
 
         return true;

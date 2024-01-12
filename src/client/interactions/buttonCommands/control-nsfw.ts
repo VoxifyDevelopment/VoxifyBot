@@ -63,7 +63,13 @@ export default class btn implements ButtonCommandExecutor {
             activate ? 'buttons.nsfw.activated' : 'buttons.nsfw.deactivated'
         );
 
-        channel?.setNSFW(activate).catch(console.error);
+        if (channel?.nsfw !== activate)
+            channel
+                ?.setNSFW(
+                    activate,
+                    `TempVoice | NSFW ${activate} requested [by ${member.user.username}]`
+                )
+                .catch(console.error);
 
         interaction
             .reply({

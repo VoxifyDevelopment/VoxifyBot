@@ -17,7 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { PermissionFlagsBits } from 'discord.js';
+import {
+    ActionRowBuilder,
+    ModalBuilder,
+    PermissionFlagsBits,
+    TextInputBuilder,
+    TextInputStyle,
+    VoiceChannel
+} from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class TeamList implements ButtonCommandExecutor {
@@ -54,11 +61,70 @@ export default class TeamList implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
-            .reply({
-                ephemeral: true,
-                content: 'not implemented yet'
+        interaction
+            .awaitModalSubmit({
+                filter: (interaction) => interaction.customId === 'modal-status-' + member.id,
+                time: 60000
             })
+            .then(async (modalInteraction) => {
+                if (!modalInteraction.guild) return false;
+                const field = modalInteraction.fields.fields.find(
+                    (f) => f.customId === 'new-status'
+                );
+                const newStatus: string = field?.value || member.id;
+
+                const key = bot.translations.translateTo(localeName, 'buttons.status.name');
+                const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
+                const content = bot.translations.translateTo(localeName, 'buttons.status.success', {
+                    status: `We are sorry this feature is not implemented yet...\n\n${newStatus}`
+                });
+
+                modalInteraction
+                    .reply({
+                        embeds: [
+                            await bot.tools.discord.generateEmbed(bot, {
+                                type: 'warning',
+                                title: `${feedback} ${key}`,
+                                content,
+                                guild: interaction.guild || undefined,
+                                user: interaction.user,
+                                timestamp: true
+                            })
+                        ],
+                        ephemeral: true
+                    })
+                    .catch(console.error);
+            })
+            .catch(console.error);
+
+        interaction
+            .showModal(
+                new ModalBuilder()
+                    .setTitle(bot.translations.translateTo(localeName, 'buttons.status.name'))
+                    .setCustomId('modal-status-' + member.id)
+                    .addComponents(
+                        new ActionRowBuilder<TextInputBuilder>().addComponents(
+                            new TextInputBuilder()
+                                .setMinLength(0)
+                                .setMaxLength(64)
+                                .setCustomId('new-status')
+                                .setStyle(TextInputStyle.Short)
+                                .setPlaceholder(
+                                    bot.translations.translateTo(
+                                        localeName,
+                                        'buttons.status.modal.placeholder'
+                                    )
+                                )
+                                .setLabel(
+                                    bot.translations.translateTo(
+                                        localeName,
+                                        'buttons.status.modal.input'
+                                    )
+                                )
+                                .setValue(channel?.name || '')
+                        )
+                    )
+            )
             .catch(console.error);
 
         return true;
