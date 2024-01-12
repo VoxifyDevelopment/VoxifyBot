@@ -130,16 +130,7 @@ export default class context implements UserContextMenuExecutor {
 
         const sent = await target
             .send({
-                content: invite.url,
-                embeds: [
-                    await bot.tools.discord.generateEmbed(bot, {
-                        type: 'success',
-                        content: `${member.displayName} ${this.id(bot, targetLocale)}`,
-                        guild: interaction.guild || undefined,
-                        user: interaction.user,
-                        timestamp: true
-                    })
-                ]
+                content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite.url}`
             })
             .catch(() => {});
 

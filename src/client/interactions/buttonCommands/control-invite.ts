@@ -130,19 +130,7 @@ export default class btn implements ButtonCommandExecutor {
 
                     const sent = await managedMember
                         .send({
-                            content: invite?.url,
-                            embeds: [
-                                await bot.tools.discord.generateEmbed(bot, {
-                                    type: 'success',
-                                    content: `${member.displayName} ${bot.translations.translateTo(
-                                        targetLocale,
-                                        'context.user.invite-user.name'
-                                    )}`,
-                                    guild: interaction.guild || undefined,
-                                    user: interaction.user,
-                                    timestamp: true
-                                })
-                            ]
+                            content: `${member.displayName} | <@!${member.id}> | <#${channel.id}>\n${invite.url}`
                         })
                         .catch(() => {});
 
