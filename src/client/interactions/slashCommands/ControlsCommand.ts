@@ -17,7 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { CommandInteractionOptionResolver, Locale, SlashCommandBuilder } from 'discord.js';
+import {
+    CommandInteractionOptionResolver,
+    Locale,
+    PermissionFlagsBits,
+    SlashCommandBuilder
+} from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
 
@@ -80,6 +85,7 @@ export default class PingCommand implements SlashCommandExecutor {
 
     async execute(event: SlashCommandEvent) {
         const { bot, interaction } = event;
+        if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
         let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
@@ -99,6 +105,20 @@ export default class PingCommand implements SlashCommandExecutor {
         if (!show) show = false;
 
         if (
+            show &&
+            !(await bot.tools.discord.checkTvcArgs(
+                localeName,
+                resolvedArgs,
+                bot.translations.translateTo(localeName, 'commands.controls.name'),
+                bot,
+                interaction,
+                false,
+                show,
+                PermissionFlagsBits.SendMessages
+            ))
+        ) {
+            return false;
+        } else if (
             !(await bot.tools.discord.checkTvcArgs(
                 localeName,
                 resolvedArgs,
@@ -119,7 +139,9 @@ export default class PingCommand implements SlashCommandExecutor {
             localeName,
             guildLocaleName,
             show && channel != null,
-            channel
+            member.permissions.has(PermissionFlagsBits.ManageChannels)
+                ? interaction.channel
+                : channel
         );
         return true;
     }
