@@ -250,3 +250,23 @@ export function msToTimeString(
 
     return timeUnits;
 }
+
+/**
+ * Pauses the execution for a specified duration.
+ *
+ * @param {number} ms - The number of milliseconds to sleep.
+ * @returns {Promise<void>} A Promise that resolves after the specified duration.
+ */
+export async function sleepAsync(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Pauses the execution for a specified duration.
+ *
+ * @param {number} ms - The number of milliseconds to sleep.
+ */
+export function sleep(ms: number): void {
+    const start = new Date().getTime();
+    while (new Date().getTime() - start < ms);
+}
