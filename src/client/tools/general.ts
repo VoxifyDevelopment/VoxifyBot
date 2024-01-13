@@ -185,13 +185,10 @@ export function msToTimeString(
     const timePad = (value: number, unit: Intl.RelativeTimeFormatUnit): string => {
         const roundedValue = Math.round(value);
 
-        // Use Intl.RelativeTimeFormat for formatting relative time strings
         const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+        const relativeTimeString = rtf.format(roundedValue, unit);
 
-        // Choose the appropriate unit based on the sign of the value
-        const relativeTimeString = rtf.format(-roundedValue, unit);
-
-        return `${relativeTimeString} ${roundedValue}`;
+        return `${relativeTimeString}`;
     };
 
     const millisecondsInSecond = 1000;
