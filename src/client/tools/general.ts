@@ -180,7 +180,6 @@ export function msToTimeString(
         const roundedValue = Math.round(value);
 
         const rtf = new Intl.RelativeTimeFormat(locale, {
-            style: 'narrow',
             numeric: 'always'
         });
 
