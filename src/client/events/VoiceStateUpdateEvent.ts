@@ -47,21 +47,16 @@ export default class VoiceStateUpdateEvent {
         if (oldChannel && oldChannel?.parent?.id === containerCached) {
             let data = await bot.cache.redis.get(`tvc.${guild.id}.${oldChannel.id}`);
             const isTempChannel = data != null && !bot.tools.general.isEmptyString(data);
-            if (isTempChannel) {
-                bot.cache.redis
-                    .setEx(`tvc.${guild.id}.${oldChannel.id}`, 1, '')
-                    .catch(console.error);
-
-                if (oldChannel.members.size < 1) {
-                    oldChannel
-                        .delete(
-                            `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
-                        )
-                        .catch(console.error);
-                    bot.out.debug(
+            if (isTempChannel && oldChannel.members.size < 1) {
+                bot.cache.redis.del(`tvc.${guild.id}.${oldChannel.id}`).catch(console.error);
+                oldChannel
+                    .delete(
                         `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
-                    );
-                }
+                    )
+                    .catch(console.error);
+                bot.out.debug(
+                    `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
+                );
             }
         }
 
@@ -111,7 +106,13 @@ export default class VoiceStateUpdateEvent {
 
             bot.out.debug(`TempVoice | new channel needed for [user ${member.user.username}]`);
 
-            bot.cache.redis.set(`tvc.${guild.id}.${channel.id}`, member.id).catch(console.error);
+            bot.cache.redis
+                .setEx(
+                    `tvc.${guild.id}.${channel.id}`,
+                    60 * 60 * 24 * 7 /*7 days expiry just in case*/,
+                    member.id
+                )
+                .catch(console.error);
             member.voice.setChannel(channel);
 
             let guildLocaleName = guild.preferredLocale.toLowerCase();
