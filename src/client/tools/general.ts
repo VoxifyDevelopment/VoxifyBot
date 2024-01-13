@@ -176,16 +176,14 @@ export function msToTimeString(
     count: number = Infinity,
     locale: string | string[] = 'en'
 ): string[] {
-    // const timePad = (value: number, unit: string): string => {
-    //     const roundedValue = Math.round(value);
-    //     const formattedValue = new Intl.NumberFormat(locale).format(roundedValue);
-    //     return `${formattedValue} ${unit}`;
-    // };
-
     const timePad = (value: number, unit: Intl.RelativeTimeFormatUnit): string => {
         const roundedValue = Math.round(value);
 
-        const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+        const rtf = new Intl.RelativeTimeFormat(locale, {
+            style: 'narrow',
+            numeric: 'always'
+        });
+
         const relativeTimeString = rtf.format(roundedValue, unit);
 
         return `${relativeTimeString}`;
