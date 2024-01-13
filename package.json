@@ -43,9 +43,14 @@
     },
     "homepage": "https://github.com/VoxifyDevelopment/VoxifyBot#readme",
     "dependencies": {
+        "@top-gg/sdk": "^3.1.6",
+        "axios": "^1.6.5",
         "discord.js": "^14.14.1",
         "dotenv": "^16.3.1",
-        "redis": "^4.6.12"
+        "install": "^0.13.0",
+        "npm": "^10.3.0",
+        "redis": "^4.6.12",
+        "topgg-autoposter": "^2.0.1"
     },
     "devDependencies": {
         "@types/node": "^20.10.7",
