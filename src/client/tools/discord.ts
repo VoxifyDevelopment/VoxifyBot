@@ -120,9 +120,11 @@ export async function updateStatus(bot: VoxifyClient): Promise<void> {
     bot.user?.setActivity({
         name: getRandomStatusName(bot),
         state: getRandomStatusState(bot),
-        type: ActivityType.Playing
+        type: ActivityType.Playing,
+        shardId: bot.shardId
     });
 }
+
 // Defines the types of embeds that can be generated
 export type EmbedType = 'success' | 'warning' | 'error' | 'info' | 'default';
 
