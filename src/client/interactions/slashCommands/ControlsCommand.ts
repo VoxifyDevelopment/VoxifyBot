@@ -139,7 +139,7 @@ export default class PingCommand implements SlashCommandExecutor {
             localeName,
             guildLocaleName,
             show && channel != null,
-            member.permissions.has(PermissionFlagsBits.ManageChannels)
+            member.permissions.has(PermissionFlagsBits.ManageChannels) && show
                 ? interaction.channel
                 : channel
         );
