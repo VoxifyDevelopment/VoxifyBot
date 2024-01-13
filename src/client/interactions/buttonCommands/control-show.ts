@@ -54,10 +54,29 @@ export default class btn implements ButtonCommandExecutor {
 
         const { member, channel } = resolvedArgs;
 
-        await interaction
+        channel?.permissionOverwrites
+            .create(channel.guild.id, {
+                ViewChannel: null
+            })
+            .catch(console.error);
+
+        const key = bot.translations.translateTo(localeName, 'buttons.show.name');
+        const feedback = bot.translations.translateTo(localeName, 'feedback.success');
+        const content = bot.translations.translateTo(localeName, 'buttons.show.success');
+
+        interaction
             .reply({
-                ephemeral: true,
-                content: 'not implemented yet'
+                embeds: [
+                    await bot.tools.discord.generateEmbed(bot, {
+                        type: 'success',
+                        title: `${feedback} ${key}`,
+                        content,
+                        guild: interaction.guild || undefined,
+                        user: interaction.user,
+                        timestamp: true
+                    })
+                ],
+                ephemeral: true
             })
             .catch(console.error);
 
