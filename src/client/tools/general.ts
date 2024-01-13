@@ -176,10 +176,22 @@ export function msToTimeString(
     count: number = Infinity,
     locale: string | string[] = 'en'
 ): string[] {
-    const timePad = (value: number, unit: string): string => {
+    // const timePad = (value: number, unit: string): string => {
+    //     const roundedValue = Math.round(value);
+    //     const formattedValue = new Intl.NumberFormat(locale).format(roundedValue);
+    //     return `${formattedValue} ${unit}`;
+    // };
+
+    const timePad = (value: number, unit: Intl.RelativeTimeFormatUnit): string => {
         const roundedValue = Math.round(value);
-        const formattedValue = new Intl.NumberFormat(locale).format(roundedValue);
-        return `${formattedValue} ${unit}`;
+
+        // Use Intl.RelativeTimeFormat for formatting relative time strings
+        const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+
+        // Choose the appropriate unit based on the sign of the value
+        const relativeTimeString = rtf.format(-roundedValue, unit);
+
+        return `${relativeTimeString} ${roundedValue}`;
     };
 
     const millisecondsInSecond = 1000;
@@ -243,10 +255,10 @@ export function msToTimeString(
         timeUnits.push(timePad(seconds, seconds === 1 ? 'second' : 'seconds'));
         count--;
     }
-    if (count > 0 && includeMilliseconds && remainingMilliseconds > 0) {
-        timeUnits.push(timePad(remainingMilliseconds, 'milliseconds'));
-        count--;
-    }
+    // if (count > 0 && includeMilliseconds && remainingMilliseconds > 0) {
+    //     timeUnits.push(timePad(remainingMilliseconds, 'milliseconds'));
+    //     count--;
+    // }
 
     return timeUnits;
 }
