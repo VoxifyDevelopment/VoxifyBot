@@ -43,104 +43,55 @@ export default class EventManager {
     constructor(bot: VoxifyClient) {
         this.bot = bot;
 
-        if (process.env.NODE_ENV === 'production') {
-            this.bot.on('shardReady', async (shardId) => {
-                this.bot.shardId = shardId;
-                this.bot.cachePrefix = `${this.bot.user?.id}.${shardId}`;
+        this.bot.on('shardReady', async (shardId) => {
+            this.bot.shardId = shardId;
+            this.bot.cachePrefix = `${this.bot.user?.id}.${shardId}`;
 
-                this.bot.user?.setActivity({
-                    name: `Users / Voice Channels`,
-                    type: this.bot.tools.discord.resolveActivityType('watching'),
-                    shardId: shardId
+            this.bot.tools.discord.updateStatus(bot).catch(console.error);
+            this.bot.tools.general.randomInterval(60000, 240000, () =>
+                this.bot.tools.discord.updateStatus(bot).catch(console.error)
+            );
+
+            this.bot.premiumEnabled =
+                (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
+            if (!this.bot.premiumEnabled)
+                this.bot.out.debug('Sadly the premium features are disabled');
+
+            this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
+
+            if (!this.bot.premiumEnabled) {
+                this.bot.on('voiceStateUpdate', async (oldState, newState) => {
+                    try {
+                        VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
+                            this.bot.out.logError(err)
+                        );
+                    } catch (err) {
+                        this.bot.out.error(err);
+                    }
                 });
+            }
 
-                this.bot.premiumEnabled =
-                    (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
-                if (!this.bot.premiumEnabled)
-                    this.bot.out.debug('Sadly the premium features are disabled');
+            let commandData = [
+                ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
+                ...this.bot.userContextInteractions.map((c) => c.data(this.bot)),
+                ...this.bot.messageContextInteractions.map((c) => c.data(this.bot))
+            ];
 
-                this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
+            this.bot.application?.commands.set(commandData);
 
-                if (!this.bot.premiumEnabled) {
-                    this.bot.on('voiceStateUpdate', async (oldState, newState) => {
-                        try {
-                            VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch(
-                                (err) => this.bot.out.logError(err)
-                            );
-                        } catch (err) {
-                            this.bot.out.error(err);
-                        }
-                    });
-                }
+            this.bot.out.debug(
+                `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
+            );
 
-                let commandData = [
-                    ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.messageContextInteractions.map((c) => c.data(this.bot))
-                ];
+            this.bot.cache.redis
+                .set(`${this.bot.cachePrefix}.lastRestarted`, Date.now())
+                .catch(() => {});
+            this.bot.out.info(`Shard ${shardId} is ready!`);
+        });
 
-                this.bot.application?.commands.set(commandData);
-
-                this.bot.out.debug(
-                    `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
-                );
-
-                this.bot.cache.redis
-                    .set(`${this.bot.cachePrefix}.lastRestarted`, Date.now())
-                    .catch(() => {});
-                this.bot.out.info(`Shard ${shardId} is ready!`);
-            });
-
-            this.bot.on('shardDisconnect', async (event, shardId) => {
-                this.bot.out.info(`Shard ${shardId} disconnected with code ${event.code}`);
-            });
-        } else {
-            this.bot.on('ready', async () => {
-                this.bot.shardId = 0;
-                this.bot.cachePrefix = `${this.bot.user?.id}.${this.bot.shardId}`;
-
-                this.bot.user?.setActivity({
-                    name: `Users / Voice Channels`,
-                    type: this.bot.tools.discord.resolveActivityType('watching')
-                });
-
-                this.bot.premiumEnabled =
-                    (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
-                if (!this.bot.premiumEnabled)
-                    this.bot.out.debug('Sadly the premium features are disabled');
-
-                this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
-
-                if (!this.bot.premiumEnabled) {
-                    this.bot.on('voiceStateUpdate', async (oldState, newState) => {
-                        try {
-                            VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch(
-                                (err) => this.bot.out.logError(err)
-                            );
-                        } catch (err) {
-                            this.bot.out.error(err);
-                        }
-                    });
-                }
-
-                let commandData = [
-                    ...this.bot.slashCommandInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.userContextInteractions.map((c) => c.data(this.bot)),
-                    ...this.bot.messageContextInteractions.map((c) => c.data(this.bot))
-                ];
-
-                this.bot.application?.commands.set(commandData).catch(console.error);
-
-                this.bot.out.debug(
-                    `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
-                );
-
-                this.bot.cache.redis
-                    .set(`${this.bot.cachePrefix}.lastRestarted`, Date.now())
-                    .catch(() => {});
-                this.bot.out.info(`Shard ${this.bot.shardId} is ready!`);
-            });
-        }
+        this.bot.on('shardDisconnect', async (event, shardId) => {
+            this.bot.out.info(`Shard ${shardId} disconnected with code ${event.code}`);
+        });
 
         this.bot.on('interactionCreate', async (interaction) => {
             try {

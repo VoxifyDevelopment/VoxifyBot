@@ -42,6 +42,8 @@ import VoxifyClient from '../VoxifyClient';
 import controlsCtx from '../../i18n/en-US/controls.json';
 import linksCtx from '../../i18n/en-US/links.json';
 
+import statusCtx from './status.json';
+
 export default () => {};
 
 /**
@@ -72,6 +74,54 @@ export function resolveActivityType(typeString: string | undefined): ActivityTyp
             break;
     }
     return type;
+}
+
+/**
+ * Gets a random status name for the bot.
+ *
+ * @param {VoxifyClient} bot - The Discord bot client.
+ * @returns {string} - A random status name.
+ */
+export function getRandomStatusName(bot: VoxifyClient): string {
+    let newStatus = statusCtx.names[Math.floor(Math.random() * statusCtx.names.length)];
+    while (newStatus === bot.user?.presence?.activities[0]?.name) {
+        newStatus = statusCtx.names[Math.floor(Math.random() * statusCtx.names.length)];
+    }
+    return newStatus;
+}
+
+/**
+ * Gets a random status state for the bot.
+ *
+ * @param {VoxifyClient} bot - The Discord bot client.
+ * @returns {string} - A random status state.
+ */
+export function getRandomStatusState(bot: VoxifyClient): string {
+    let newStatus = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
+    while (newStatus === bot.user?.presence?.activities[0]?.name) {
+        newStatus = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
+    }
+    return newStatus;
+}
+
+/**
+ * Updates the bot's status with a random name and state.
+ *
+ * @param {VoxifyClient} bot - The Discord bot client.
+ * @returns {Promise<void>} - A promise indicating the completion of the status update.
+ */
+export async function updateStatus(bot: VoxifyClient): Promise<void> {
+    bot.user?.setPresence({
+        status: 'dnd',
+        afk: false,
+        shardId: bot.shardId
+    });
+
+    bot.user?.setActivity({
+        name: getRandomStatusName(bot),
+        state: getRandomStatusState(bot),
+        type: ActivityType.Playing
+    });
 }
 // Defines the types of embeds that can be generated
 export type EmbedType = 'success' | 'warning' | 'error' | 'info' | 'default';
