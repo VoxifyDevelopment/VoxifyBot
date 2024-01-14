@@ -17,14 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ModalBuilder,
-    PermissionFlagsBits,
-    TextInputBuilder,
-    TextInputStyle,
-    VoiceChannel
-} from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle, VoiceChannel } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class TeamList implements ButtonCommandExecutor {
@@ -33,13 +26,9 @@ export default class TeamList implements ButtonCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -68,9 +57,7 @@ export default class TeamList implements ButtonCommandExecutor {
             })
             .then(async (modalInteraction) => {
                 if (!modalInteraction.guild) return false;
-                const field = modalInteraction.fields.fields.find(
-                    (f) => f.customId === 'new-status'
-                );
+                const field = modalInteraction.fields.fields.find((f) => f.customId === 'new-status');
                 const newStatus: string = field?.value || member.id;
 
                 const key = bot.translations.translateTo(localeName, 'buttons.status.name');
@@ -109,18 +96,8 @@ export default class TeamList implements ButtonCommandExecutor {
                                 .setMaxLength(64)
                                 .setCustomId('new-status')
                                 .setStyle(TextInputStyle.Short)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.status.modal.placeholder'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.status.modal.input'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'buttons.status.modal.placeholder'))
+                                .setLabel(bot.translations.translateTo(localeName, 'buttons.status.modal.input'))
                                 .setValue(channel?.name || '')
                         )
                     )

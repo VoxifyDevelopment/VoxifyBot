@@ -17,10 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    MessageContextMenuCommandInteraction,
-    RESTPostAPIContextMenuApplicationCommandsJSONBody
-} from 'discord.js';
+import { MessageContextMenuCommandInteraction, RESTPostAPIContextMenuApplicationCommandsJSONBody } from 'discord.js';
 
 import Executor from './Executor';
 import VoxifyClient from '../VoxifyClient';

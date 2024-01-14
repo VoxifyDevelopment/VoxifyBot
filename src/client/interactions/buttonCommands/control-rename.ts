@@ -17,13 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ModalBuilder,
-    PermissionFlagsBits,
-    TextInputBuilder,
-    TextInputStyle
-} from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -32,13 +26,9 @@ export default class btn implements ButtonCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -67,21 +57,15 @@ export default class btn implements ButtonCommandExecutor {
             })
             .then(async (modalInteraction) => {
                 if (!modalInteraction.guild) return false;
-                const field = modalInteraction.fields.fields.find(
-                    (f) => f.customId === 'new-rename'
-                );
+                const field = modalInteraction.fields.fields.find((f) => f.customId === 'new-rename');
                 const newName: string = field?.value || member.id;
 
                 if (newName === channel?.name) {
                     const key = bot.translations.translateTo(localeName, 'buttons.rename.name');
                     const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'buttons.rename.already',
-                        {
-                            name: newName
-                        }
-                    );
+                    const content = bot.translations.translateTo(localeName, 'buttons.rename.already', {
+                        name: newName
+                    });
 
                     modalInteraction
                         .reply({
@@ -102,10 +86,7 @@ export default class btn implements ButtonCommandExecutor {
                 }
 
                 channel
-                    ?.setName(
-                        newName,
-                        `TempVoice | bitrate change requested [by ${member.user.username}] [from ${channel.name}] [to ${newName}]`
-                    )
+                    ?.setName(newName, `TempVoice | bitrate change requested [by ${member.user.username}] [from ${channel.name}] [to ${newName}]`)
                     .catch(console.error);
 
                 const key = bot.translations.translateTo(localeName, 'buttons.rename.name');
@@ -144,18 +125,8 @@ export default class btn implements ButtonCommandExecutor {
                                 .setMaxLength(32)
                                 .setCustomId('new-rename')
                                 .setStyle(TextInputStyle.Short)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.rename.modal.placeholder'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.rename.modal.input'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'buttons.rename.modal.placeholder'))
+                                .setLabel(bot.translations.translateTo(localeName, 'buttons.rename.modal.input'))
                                 .setValue(channel?.name || '')
                         )
                     )

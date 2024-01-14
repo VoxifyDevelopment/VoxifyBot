@@ -26,16 +26,9 @@ export default class VoiceStateUpdateEvent {
         let member = newState.member;
         if (!member) return true;
 
-        if (
-            !guild.members.cache
-                .get(bot.user?.id || '')
-                ?.permissions.has(PermissionFlagsBits.ManageChannels)
-        )
-            return false; // early return if bot cannot manage channels
+        if (!guild.members.cache.get(bot.user?.id || '')?.permissions.has(PermissionFlagsBits.ManageChannels)) return false; // early return if bot cannot manage channels
 
-        let containerCached = await bot.cache.redis
-            .get(`containerCached.${guild.id}`)
-            .catch(console.error);
+        let containerCached = await bot.cache.redis.get(`containerCached.${guild.id}`).catch(console.error);
         if (!containerCached) return false;
         let lobbyCached = await bot.cache.redis.get(`lobbyCached.${guild.id}`).catch(console.error);
         if (!lobbyCached) return false;
@@ -49,21 +42,13 @@ export default class VoiceStateUpdateEvent {
             const isTempChannel = data != null && !bot.tools.general.isEmptyString(data);
             if (isTempChannel && oldChannel.members.size < 1) {
                 bot.cache.redis.del(`tvc.${guild.id}.${oldChannel.id}`).catch(console.error);
-                oldChannel
-                    .delete(
-                        `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
-                    )
-                    .catch(console.error);
-                bot.out.debug(
-                    `TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`
-                );
+                oldChannel.delete(`TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`).catch(console.error);
+                bot.out.debug(`TempVoice | not needed anymore <emptyChannel> [last ${member.user.username}]`);
             }
         }
 
         if (newChannel && newChannel.id === lobbyCached) {
-            let container =
-                guild.channels.cache.get(containerCached) ||
-                (await guild.channels.fetch(containerCached).catch(() => {}));
+            let container = guild.channels.cache.get(containerCached) || (await guild.channels.fetch(containerCached).catch(() => {}));
 
             if (!container || typeof container === 'function') return false;
 
@@ -106,25 +91,12 @@ export default class VoiceStateUpdateEvent {
 
             bot.out.debug(`TempVoice | new channel needed for [user ${member.user.username}]`);
 
-            bot.cache.redis
-                .setEx(
-                    `tvc.${guild.id}.${channel.id}`,
-                    60 * 60 * 24 * 7 /*7 days expiry just in case*/,
-                    member.id
-                )
-                .catch(console.error);
+            bot.cache.redis.setEx(`tvc.${guild.id}.${channel.id}`, 60 * 60 * 24 * 7 /*7 days expiry just in case*/, member.id).catch(console.error);
             member.voice.setChannel(channel);
 
             let guildLocaleName = guild.preferredLocale.toLowerCase();
 
-            bot.tools.discord.generateTempVoiceControls(
-                bot,
-                null,
-                guildLocaleName,
-                guildLocaleName,
-                true,
-                channel
-            );
+            bot.tools.discord.generateTempVoiceControls(bot, null, guildLocaleName, guildLocaleName, true, channel);
 
             return true;
         }

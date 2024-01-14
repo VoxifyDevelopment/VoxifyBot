@@ -35,10 +35,8 @@ export default class EventManager {
     private button: _ButtonInteractionEventExecutor = new _ButtonInteractionEventExecutor();
     private modal: _ModalInteractionEventExecutor = new _ModalInteractionEventExecutor();
     private slash: _CommandInteractionEventExecutor = new _CommandInteractionEventExecutor();
-    private userContext: _UserContextMenuInteractionEventExecutor =
-        new _UserContextMenuInteractionEventExecutor();
-    private messageContext: _MessageContextMenuInteractionEventExecutor =
-        new _MessageContextMenuInteractionEventExecutor();
+    private userContext: _UserContextMenuInteractionEventExecutor = new _UserContextMenuInteractionEventExecutor();
+    private messageContext: _MessageContextMenuInteractionEventExecutor = new _MessageContextMenuInteractionEventExecutor();
 
     constructor(bot: VoxifyClient) {
         this.bot = bot;
@@ -48,23 +46,17 @@ export default class EventManager {
             this.bot.cachePrefix = `${this.bot.user?.id}.${shardId}`;
 
             this.bot.tools.discord.updateStatus(bot).catch(console.error);
-            this.bot.tools.general.randomInterval(60000, 240000, () =>
-                this.bot.tools.discord.updateStatus(bot).catch(console.error)
-            );
+            this.bot.tools.general.randomInterval(60000, 240000, () => this.bot.tools.discord.updateStatus(bot).catch(console.error));
 
-            this.bot.premiumEnabled =
-                (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
-            if (!this.bot.premiumEnabled)
-                this.bot.out.debug('Sadly the premium features are disabled');
+            this.bot.premiumEnabled = (await premiumCheckAndAdd(this.bot).catch(console.error)) || false;
+            if (!this.bot.premiumEnabled) this.bot.out.debug('Sadly the premium features are disabled');
 
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registering (/) commands.`);
 
             if (!this.bot.premiumEnabled) {
                 this.bot.on('voiceStateUpdate', async (oldState, newState) => {
                     try {
-                        VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) =>
-                            this.bot.out.logError(err)
-                        );
+                        VoiceStateUpdateEvent.execute(this.bot, oldState, newState).catch((err) => this.bot.out.logError(err));
                     } catch (err) {
                         this.bot.out.error(err);
                     }
@@ -79,13 +71,9 @@ export default class EventManager {
 
             this.bot.application?.commands.set(commandData);
 
-            this.bot.out.debug(
-                `Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`
-            );
+            this.bot.out.debug(`Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`);
 
-            this.bot.cache.redis
-                .set(`${this.bot.cachePrefix}.lastRestarted`, Date.now())
-                .catch(() => {});
+            this.bot.cache.redis.set(`${this.bot.cachePrefix}.lastRestarted`, Date.now()).catch(() => {});
             this.bot.out.info(`Shard ${shardId} is ready!`);
         });
 
@@ -103,9 +91,7 @@ export default class EventManager {
                 } else if (interaction.isUserContextMenuCommand()) {
                     this.userContext.execute({ bot: this.bot, interaction }).catch(console.error);
                 } else if (interaction.isMessageContextMenuCommand()) {
-                    this.messageContext
-                        .execute({ bot: this.bot, interaction })
-                        .catch(console.error);
+                    this.messageContext.execute({ bot: this.bot, interaction }).catch(console.error);
                 } else if (interaction.isChatInputCommand()) {
                     this.slash.execute({ bot: this.bot, interaction }).catch(console.error);
                 }
@@ -115,15 +101,11 @@ export default class EventManager {
         });
 
         this.bot.on('guildCreate', async (guild) => {
-            this.bot.out.debug(
-                `Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Created in: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`
-            );
+            this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Created in: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
         });
 
         this.bot.on('guildDelete', async (guild) => {
-            this.bot.out.debug(
-                `Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`
-            );
+            this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
         });
     }
 }
@@ -156,11 +138,7 @@ export interface ModalInteractionEvent {
 export class _ButtonInteractionEventExecutor implements Executor<ButtonInteractionEvent> {
     async execute(event: ButtonInteractionEvent): Promise<boolean> {
         try {
-            return (
-                event.bot.buttonCommandInteractions
-                    .get(event.interaction.customId)
-                    ?.execute({ ...event }) || false
-            );
+            return event.bot.buttonCommandInteractions.get(event.interaction.customId)?.execute({ ...event }) || false;
         } catch (err) {
             return false;
         }
@@ -170,11 +148,7 @@ export class _ButtonInteractionEventExecutor implements Executor<ButtonInteracti
 export class _ModalInteractionEventExecutor implements Executor<ModalInteractionEvent> {
     async execute(event: ModalInteractionEvent): Promise<boolean> {
         try {
-            return (
-                event.bot.modalSubmitInteractions
-                    .get(event.interaction.customId)
-                    ?.execute({ ...event }) || false
-            );
+            return event.bot.modalSubmitInteractions.get(event.interaction.customId)?.execute({ ...event }) || false;
         } catch (err) {
             return false;
         }
@@ -184,43 +158,27 @@ export class _ModalInteractionEventExecutor implements Executor<ModalInteraction
 export class _CommandInteractionEventExecutor implements Executor<CommandInteractionEvent> {
     async execute(event: CommandInteractionEvent): Promise<boolean> {
         try {
-            return (
-                event.bot.slashCommandInteractions
-                    .get(event.interaction.commandName)
-                    ?.execute({ ...event }) || false
-            );
+            return event.bot.slashCommandInteractions.get(event.interaction.commandName)?.execute({ ...event }) || false;
         } catch (err) {
             return false;
         }
     }
 }
 
-export class _UserContextMenuInteractionEventExecutor
-    implements Executor<UserContextMenuInteractionEvent>
-{
+export class _UserContextMenuInteractionEventExecutor implements Executor<UserContextMenuInteractionEvent> {
     async execute(event: UserContextMenuInteractionEvent): Promise<boolean> {
         try {
-            return (
-                event.bot.userContextInteractions
-                    .get(event.interaction.commandName)
-                    ?.execute({ ...event }) || false
-            );
+            return event.bot.userContextInteractions.get(event.interaction.commandName)?.execute({ ...event }) || false;
         } catch (err) {
             return false;
         }
     }
 }
 
-export class _MessageContextMenuInteractionEventExecutor
-    implements Executor<MessageContextMenuInteractionEvent>
-{
+export class _MessageContextMenuInteractionEventExecutor implements Executor<MessageContextMenuInteractionEvent> {
     async execute(event: MessageContextMenuInteractionEvent): Promise<boolean> {
         try {
-            return (
-                event.bot.messageContextInteractions
-                    .get(event.interaction.commandName)
-                    ?.execute({ ...event }) || false
-            );
+            return event.bot.messageContextInteractions.get(event.interaction.commandName)?.execute({ ...event }) || false;
         } catch (err) {
             return false;
         }

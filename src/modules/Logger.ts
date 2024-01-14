@@ -80,9 +80,7 @@ export class TextFormat {
      * @returns An array of strings, representing the tokens after splitting.
      */
     static tokenize = (str: string): string[] => {
-        return str
-            .split(new RegExp('(' + TextFormat.ESCAPE + '[0123456789abcdefklmnor])'))
-            .filter((v) => v !== '');
+        return str.split(new RegExp('(' + TextFormat.ESCAPE + '[0123456789abcdefklmnor])')).filter((v) => v !== '');
     };
 
     /**
@@ -209,11 +207,7 @@ export default class Logger {
     private out(level: string, messages: any[], color: string = TerminalTextFormat.GRAY): void {
         if (messages.length === 0) return;
 
-        messages = Array.from(messages).map(
-            (message) =>
-                (typeof message === 'string' ? TextFormat.toTerminal(message) : message) +
-                TerminalTextFormat.RESET
-        );
+        messages = Array.from(messages).map((message) => (typeof message === 'string' ? TextFormat.toTerminal(message) : message) + TerminalTextFormat.RESET);
 
         this.print(
             TerminalTextFormat.BLUE +

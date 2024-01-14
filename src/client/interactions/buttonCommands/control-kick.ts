@@ -17,14 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ChannelFlags,
-    GuildMember,
-    PermissionFlagsBits,
-    UserSelectMenuBuilder,
-    UserSelectMenuInteraction
-} from 'discord.js';
+import { ActionRowBuilder, ChannelFlags, GuildMember, PermissionFlagsBits, UserSelectMenuBuilder, UserSelectMenuInteraction } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -33,13 +26,9 @@ export default class btn implements ButtonCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -63,9 +52,7 @@ export default class btn implements ButtonCommandExecutor {
 
         interaction.channel
             ?.awaitMessageComponent({
-                filter: (collected) =>
-                    collected.isUserSelectMenu() &&
-                    collected.customId === 'select-kick-' + member.id,
+                filter: (collected) => collected.isUserSelectMenu() && collected.customId === 'select-kick-' + member.id,
                 time: 60000
             })
             .then(async (selectInteraction) => {
@@ -76,9 +63,7 @@ export default class btn implements ButtonCommandExecutor {
 
                 for (let [id, managedMember] of toBan) {
                     if (!(managedMember instanceof GuildMember)) {
-                        let mem =
-                            channel?.guild.members.cache.get(id) ||
-                            (await channel?.guild.members.fetch(id).catch(console.error));
+                        let mem = channel?.guild.members.cache.get(id) || (await channel?.guild.members.fetch(id).catch(console.error));
                         if (!mem || typeof mem === 'function') {
                             usersNotBanned.push(id);
                             continue;
@@ -98,18 +83,13 @@ export default class btn implements ButtonCommandExecutor {
                     }
 
                     if (channel.members.has(managedMember.id)) {
-                        managedMember.voice.disconnect(
-                            `TempVoice | kick requested by [user ${member.user.username}]`
-                        );
+                        managedMember.voice.disconnect(`TempVoice | kick requested by [user ${member.user.username}]`);
                     }
                     usersBanned.push(managedMember.user.tag);
                 }
 
                 const feedback = bot.translations.translateTo(localeName, 'feedback.success');
-                const localizedName = bot.translations.translateTo(
-                    localeName,
-                    'context.user.kick-user.name'
-                );
+                const localizedName = bot.translations.translateTo(localeName, 'context.user.kick-user.name');
 
                 selectInteraction
                     .reply({
@@ -132,10 +112,7 @@ ${usersNotBanned.length > 0 ? `❌ ${usersNotBanned.join(',\n❌')}` : ''}
             });
 
         const feedback = bot.translations.translateTo(localeName, 'feedback.success');
-        const localizedName = bot.translations.translateTo(
-            localeName,
-            'context.user.kick-user.name'
-        );
+        const localizedName = bot.translations.translateTo(localeName, 'context.user.kick-user.name');
 
         interaction
             .reply({

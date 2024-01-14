@@ -17,13 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ModalBuilder,
-    PermissionFlagsBits,
-    TextInputBuilder,
-    TextInputStyle
-} from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 const rateMultiplier: number = 1000;
@@ -34,13 +28,9 @@ export default class btn implements ButtonCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -69,21 +59,15 @@ export default class btn implements ButtonCommandExecutor {
             })
             .then(async (modalInteraction) => {
                 if (!modalInteraction.guild) return false;
-                const field = modalInteraction.fields.fields.find(
-                    (f) => f.customId === 'new-bitrate'
-                );
+                const field = modalInteraction.fields.fields.find((f) => f.customId === 'new-bitrate');
                 const newRate: number = parseInt(field?.value || '100') || 100;
 
                 if (newRate < 8 || newRate > 96) {
                     const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
                     const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'buttons.bitrate.wrong-input',
-                        {
-                            bitrate: `${newRate}`
-                        }
-                    );
+                    const content = bot.translations.translateTo(localeName, 'buttons.bitrate.wrong-input', {
+                        bitrate: `${newRate}`
+                    });
 
                     modalInteraction
                         .reply({
@@ -106,13 +90,9 @@ export default class btn implements ButtonCommandExecutor {
                 if (newRate === channel?.bitrate) {
                     const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
                     const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'buttons.bitrate.already',
-                        {
-                            bitrate: `${newRate}`
-                        }
-                    );
+                    const content = bot.translations.translateTo(localeName, 'buttons.bitrate.already', {
+                        bitrate: `${newRate}`
+                    });
 
                     modalInteraction
                         .reply({
@@ -141,13 +121,9 @@ export default class btn implements ButtonCommandExecutor {
 
                 const key = bot.translations.translateTo(localeName, 'buttons.bitrate.name');
                 const feedback = bot.translations.translateTo(localeName, 'feedback.success');
-                const content = bot.translations.translateTo(
-                    localeName,
-                    'buttons.bitrate.success',
-                    {
-                        bitrate: `${newRate}`
-                    }
-                );
+                const content = bot.translations.translateTo(localeName, 'buttons.bitrate.success', {
+                    bitrate: `${newRate}`
+                });
 
                 modalInteraction
                     .reply({
@@ -179,18 +155,8 @@ export default class btn implements ButtonCommandExecutor {
                                 .setMaxLength(2)
                                 .setCustomId('new-bitrate')
                                 .setStyle(TextInputStyle.Short)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.bitrate.modal.placeholder'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.bitrate.modal.input'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'buttons.bitrate.modal.placeholder'))
+                                .setLabel(bot.translations.translateTo(localeName, 'buttons.bitrate.modal.input'))
                                 .setValue('' + (channel?.bitrate || 64000) / rateMultiplier)
                         )
                     )

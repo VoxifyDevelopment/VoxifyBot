@@ -17,22 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ApplicationCommandType,
-    ContextMenuCommandBuilder,
-    InviteTargetType,
-    Locale,
-    PermissionFlagsBits
-} from 'discord.js';
+import { ApplicationCommandType, ContextMenuCommandBuilder, InviteTargetType, Locale, PermissionFlagsBits } from 'discord.js';
 import VoxifyClient from '../../VoxifyClient';
 import { UserContextMenuInteractionEvent } from '../../events/EventManager';
 import UserContextMenuExecutor from '../../executors/UserContextMenuExecutor';
 
 export default class context implements UserContextMenuExecutor {
     id = (bot: VoxifyClient, localeName?: string) =>
-        localeName
-            ? bot.translations.translateTo(localeName, 'context.user.invite-user.name')
-            : bot.translations.translate('context.user.invite-user.name');
+        localeName ? bot.translations.translateTo(localeName, 'context.user.invite-user.name') : bot.translations.translate('context.user.invite-user.name');
     data(bot: VoxifyClient) {
         const cmcBuilder = new ContextMenuCommandBuilder()
             .setType(ApplicationCommandType.User)
@@ -43,10 +35,7 @@ export default class context implements UserContextMenuExecutor {
         Object.entries(bot.translations.translations).forEach(([localeName, translation]) => {
             const normalizedLanguage = bot.translations.uppercaseSuffix(localeName);
             if (!Object.values(Locale).includes(normalizedLanguage as Locale)) return;
-            let name = bot.translations.translateTo(
-                normalizedLanguage,
-                'context.user.invite-user.name'
-            );
+            let name = bot.translations.translateTo(normalizedLanguage, 'context.user.invite-user.name');
             names[normalizedLanguage as Locale] = name;
         });
 
@@ -61,9 +50,7 @@ export default class context implements UserContextMenuExecutor {
             ? interaction.locale.toLowerCase()
             : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -74,18 +61,7 @@ export default class context implements UserContextMenuExecutor {
 
         const localizedName = this.id(bot, localeName);
 
-        if (
-            !(await bot.tools.discord.checkTvcArgs(
-                localeName,
-                resolvedArgs,
-                localizedName,
-                bot,
-                interaction,
-                true,
-                true,
-                PermissionFlagsBits.MoveMembers
-            ))
-        )
+        if (!(await bot.tools.discord.checkTvcArgs(localeName, resolvedArgs, localizedName, bot, interaction, true, true, PermissionFlagsBits.MoveMembers)))
             return false;
 
         const { member, channel } = resolvedArgs;

@@ -17,13 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ModalBuilder,
-    PermissionFlagsBits,
-    TextInputBuilder,
-    TextInputStyle
-} from 'discord.js';
+import { ActionRowBuilder, ModalBuilder, PermissionFlagsBits, TextInputBuilder, TextInputStyle } from 'discord.js';
 import ButtonCommandExecutor, { ButtonCommandEvent } from '../../executors/ButtonCommandExecutor';
 
 export default class btn implements ButtonCommandExecutor {
@@ -32,13 +26,9 @@ export default class btn implements ButtonCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -67,21 +57,15 @@ export default class btn implements ButtonCommandExecutor {
             })
             .then(async (modalInteraction) => {
                 if (!modalInteraction.guild) return false;
-                const field = modalInteraction.fields.fields.find(
-                    (f) => f.customId === 'new-limit'
-                );
+                const field = modalInteraction.fields.fields.find((f) => f.customId === 'new-limit');
                 const newLimit: number = parseInt(field?.value || '100') || 100;
 
                 if (newLimit < 0 || newLimit > 99) {
                     const key = bot.translations.translateTo(localeName, 'buttons.limit.name');
                     const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'buttons.limit.wrong-input',
-                        {
-                            limit: `${newLimit}`
-                        }
-                    );
+                    const content = bot.translations.translateTo(localeName, 'buttons.limit.wrong-input', {
+                        limit: `${newLimit}`
+                    });
 
                     modalInteraction
                         .reply({
@@ -104,13 +88,9 @@ export default class btn implements ButtonCommandExecutor {
                 if (newLimit === channel?.userLimit) {
                     const key = bot.translations.translateTo(localeName, 'buttons.limit.name');
                     const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'buttons.limit.already',
-                        {
-                            limit: `${newLimit}`
-                        }
-                    );
+                    const content = bot.translations.translateTo(localeName, 'buttons.limit.already', {
+                        limit: `${newLimit}`
+                    });
 
                     modalInteraction
                         .reply({
@@ -131,10 +111,7 @@ export default class btn implements ButtonCommandExecutor {
                 }
 
                 channel
-                    ?.setUserLimit(
-                        newLimit,
-                        `TempVoice | limit change requested [by ${member.user.username}] [from ${channel.userLimit}] [to ${newLimit}]`
-                    )
+                    ?.setUserLimit(newLimit, `TempVoice | limit change requested [by ${member.user.username}] [from ${channel.userLimit}] [to ${newLimit}]`)
                     .catch(console.error);
 
                 const key = bot.translations.translateTo(localeName, 'buttons.limit.name');
@@ -173,18 +150,8 @@ export default class btn implements ButtonCommandExecutor {
                                 .setMaxLength(2)
                                 .setCustomId('new-limit')
                                 .setStyle(TextInputStyle.Short)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.limit.modal.placeholder'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'buttons.limit.modal.input'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'buttons.limit.modal.placeholder'))
+                                .setLabel(bot.translations.translateTo(localeName, 'buttons.limit.modal.input'))
                                 .setValue('' + channel?.userLimit || '')
                         )
                     )

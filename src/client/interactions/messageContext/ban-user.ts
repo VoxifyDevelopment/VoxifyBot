@@ -17,21 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ApplicationCommandType,
-    ContextMenuCommandBuilder,
-    Locale,
-    PermissionFlagsBits
-} from 'discord.js';
+import { ApplicationCommandType, ContextMenuCommandBuilder, Locale, PermissionFlagsBits } from 'discord.js';
 import VoxifyClient from '../../VoxifyClient';
 import { MessageContextMenuInteractionEvent } from '../../events/EventManager';
 import MessageContextMenuExecutor from '../../executors/MessageContextMenuExecutor';
 
 export default class context implements MessageContextMenuExecutor {
     id = (bot: VoxifyClient, localeName?: string) =>
-        localeName
-            ? bot.translations.translateTo(localeName, 'context.user.ban-user.name')
-            : bot.translations.translate('context.user.ban-user.name');
+        localeName ? bot.translations.translateTo(localeName, 'context.user.ban-user.name') : bot.translations.translate('context.user.ban-user.name');
     data(bot: VoxifyClient) {
         const cmcBuilder = new ContextMenuCommandBuilder()
             .setType(ApplicationCommandType.Message)
@@ -42,10 +35,7 @@ export default class context implements MessageContextMenuExecutor {
         Object.entries(bot.translations.translations).forEach(([localeName, translation]) => {
             const normalizedLanguage = bot.translations.uppercaseSuffix(localeName);
             if (!Object.values(Locale).includes(normalizedLanguage as Locale)) return;
-            let name = bot.translations.translateTo(
-                normalizedLanguage,
-                'context.user.ban-user.name'
-            );
+            let name = bot.translations.translateTo(normalizedLanguage, 'context.user.ban-user.name');
             names[normalizedLanguage as Locale] = name;
         });
 
@@ -60,9 +50,7 @@ export default class context implements MessageContextMenuExecutor {
             ? interaction.locale.toLowerCase()
             : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -90,9 +78,7 @@ export default class context implements MessageContextMenuExecutor {
 
         const { member } = resolvedArgs;
 
-        target.voice
-            .disconnect(`TempVoice | ban requested by [user ${member.user.username}]`)
-            .catch(console.error);
+        target.voice.disconnect(`TempVoice | ban requested by [user ${member.user.username}]`).catch(console.error);
 
         const feedback = bot.translations.translateTo(localeName, 'feedback.success');
 

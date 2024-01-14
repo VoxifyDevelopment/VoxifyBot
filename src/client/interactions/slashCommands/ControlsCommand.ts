@@ -17,12 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    CommandInteractionOptionResolver,
-    Locale,
-    PermissionFlagsBits,
-    SlashCommandBuilder
-} from 'discord.js';
+import { CommandInteractionOptionResolver, Locale, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
 
@@ -30,9 +25,7 @@ export default class PingCommand implements SlashCommandExecutor {
     name = 'controls';
 
     data = (bot: VoxifyClient) => {
-        let dataJson = new SlashCommandBuilder()
-            .setName(this.name)
-            .setDescription(bot.translations.translate('commands.controls.description'));
+        let dataJson = new SlashCommandBuilder().setName(this.name).setDescription(bot.translations.translate('commands.controls.description'));
 
         let names = bot.translations.initializeLocales();
         let descriptions = bot.translations.initializeLocales();
@@ -46,21 +39,12 @@ export default class PingCommand implements SlashCommandExecutor {
 
             let name = bot.translations.translateTo(normalizedLanguage, 'commands.controls.name');
             names[normalizedLanguage as Locale] = name;
-            let description = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.controls.show.description'
-            );
+            let description = bot.translations.translateTo(normalizedLanguage, 'commands.controls.show.description');
             descriptions[normalizedLanguage as Locale] = description;
 
-            let nameShow = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.controls.show.name'
-            );
+            let nameShow = bot.translations.translateTo(normalizedLanguage, 'commands.controls.show.name');
             namesShow[normalizedLanguage as Locale] = nameShow;
-            let descriptionShow = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.controls.show.description'
-            );
+            let descriptionShow = bot.translations.translateTo(normalizedLanguage, 'commands.controls.show.description');
             descriptionsShow[normalizedLanguage as Locale] = descriptionShow;
         });
 
@@ -71,9 +55,7 @@ export default class PingCommand implements SlashCommandExecutor {
             channelOption.setRequired(false);
 
             channelOption.setName(bot.translations.translate('commands.controls.show.name'));
-            channelOption.setDescription(
-                bot.translations.translate('commands.controls.show.description')
-            );
+            channelOption.setDescription(bot.translations.translate('commands.controls.show.description'));
 
             channelOption.setNameLocalizations(namesShow);
             channelOption.setDescriptionLocalizations(descriptionsShow);
@@ -88,13 +70,9 @@ export default class PingCommand implements SlashCommandExecutor {
         if (!interaction.guild) return false;
 
         let guildLocaleName = interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
-        let localeName = bot.translations.translations[interaction.locale.toLowerCase()]
-            ? interaction.locale.toLowerCase()
-            : guildLocaleName;
+        let localeName = bot.translations.translations[interaction.locale.toLowerCase()] ? interaction.locale.toLowerCase() : guildLocaleName;
 
-        const resolvedArgs = await bot.tools.discord
-            .resolveTempVoiceArgs(bot, interaction)
-            .catch(console.error);
+        const resolvedArgs = await bot.tools.discord.resolveTempVoiceArgs(bot, interaction).catch(console.error);
         if (!resolvedArgs || resolvedArgs === true) {
             bot.out.debug('OUT: resolvedArgs not existent');
             return false;
@@ -139,9 +117,7 @@ export default class PingCommand implements SlashCommandExecutor {
             localeName,
             guildLocaleName,
             show && channel != null,
-            member.permissions.has(PermissionFlagsBits.ManageChannels) && show
-                ? interaction.channel
-                : channel
+            member.permissions.has(PermissionFlagsBits.ManageChannels) && show ? interaction.channel : channel
         );
         return true;
     }

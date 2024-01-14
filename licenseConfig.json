@@ -1,19 +1,5 @@
 {
-    "ignore": [
-        ".*",
-        "*.json",
-        "*.txt",
-        "*.md",
-        "*.yml",
-        "*.yaml",
-        "**/.*",
-        "**/*.json",
-        "**/*.txt",
-        "**/*.md",
-        "**/*.yml",
-        "**/*.yaml",
-        "Dockerfile"
-    ],
+    "ignore": [".*", "*.json", "*.txt", "*.md", "*.yml", "*.yaml", "**/.*", "**/*.json", "**/*.txt", "**/*.md", "**/*.yml", "**/*.yaml", "Dockerfile"],
     "license": "HEADER.txt",
     "licenseFormats": {
         "js": {

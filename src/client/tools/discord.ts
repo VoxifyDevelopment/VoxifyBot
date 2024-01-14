@@ -147,10 +147,7 @@ export interface EmbedOptions {
  * @param {EmbedOptions} options - The options for generating the embed.
  * @returns {Promise<EmbedBuilder>} A Promise that resolves to the generated EmbedBuilder instance.
  */
-export async function generateEmbed(
-    bot: VoxifyClient,
-    options: EmbedOptions
-): Promise<EmbedBuilder> {
+export async function generateEmbed(bot: VoxifyClient, options: EmbedOptions): Promise<EmbedBuilder> {
     // Create a new EmbedBuilder instance
     let embed = new EmbedBuilder();
 
@@ -176,18 +173,10 @@ export async function generateEmbed(
     // Set the description, footer, thumbnail, and URL for the embed
     embed.setDescription(options.content);
     embed.setFooter({
-        text: `VoxifyBot | Shard: ${bot.shardId}${
-            options.footerAddition ? ` | ${options.footerAddition}` : ''
-        }`,
-        iconURL:
-            (options.guild ? options.guild.iconURL() : bot.user?.displayAvatarURL()) ||
-            'https://avatars.githubusercontent.com/u/155932207?s=220'
+        text: `VoxifyBot | Shard: ${bot.shardId}${options.footerAddition ? ` | ${options.footerAddition}` : ''}`,
+        iconURL: (options.guild ? options.guild.iconURL() : bot.user?.displayAvatarURL()) || 'https://avatars.githubusercontent.com/u/155932207?s=220'
     });
-    embed.setThumbnail(
-        options.thumbnail ||
-            bot.user?.displayAvatarURL() ||
-            'https://avatars.githubusercontent.com/u/155932207?s=220'
-    );
+    embed.setThumbnail(options.thumbnail || bot.user?.displayAvatarURL() || 'https://avatars.githubusercontent.com/u/155932207?s=220');
 
     if (options.url) {
         embed.setURL(options.url || 'https://github.com/VoxifyDevelopment/VoxifyBot');
@@ -219,12 +208,7 @@ export async function generateEmbed(
  */
 export async function resolveTempVoiceArgs(
     bot: VoxifyClient,
-    interaction:
-        | ButtonInteraction
-        | ModalSubmitInteraction
-        | CommandInteraction
-        | UserContextMenuCommandInteraction
-        | MessageContextMenuCommandInteraction
+    interaction: ButtonInteraction | ModalSubmitInteraction | CommandInteraction | UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction
 ): Promise<{ member: GuildMember; channel: VoiceBasedChannel | null } | boolean> {
     // Get the user ID from the interaction's member
     const userId = interaction.member?.user.id;
@@ -234,9 +218,7 @@ export async function resolveTempVoiceArgs(
     }
 
     // Fetch the member from the guild using the user ID
-    let member =
-        interaction.guild?.members.cache.get(userId) ||
-        (await interaction.guild?.members.fetch(userId).catch(console.error));
+    let member = interaction.guild?.members.cache.get(userId) || (await interaction.guild?.members.fetch(userId).catch(console.error));
 
     // If no member is found or it's not a GuildMember instance, return false
     if (!member || !(member instanceof GuildMember)) {
@@ -255,12 +237,7 @@ export async function tvcError(
     command: string,
     bot: VoxifyClient,
     localeName: string,
-    interaction:
-        | ButtonInteraction
-        | ModalSubmitInteraction
-        | CommandInteraction
-        | UserContextMenuCommandInteraction
-        | MessageContextMenuCommandInteraction
+    interaction: ButtonInteraction | ModalSubmitInteraction | CommandInteraction | UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction
 ) {
     const feedback = bot.translations.translateTo(localeName, 'feedback.error');
     const content = bot.translations.translateTo(localeName, 'errors.tvc', {
@@ -303,12 +280,7 @@ export async function checkTvcArgs(
     args: { member: GuildMember; channel: VoiceBasedChannel | null },
     command: string,
     bot: VoxifyClient,
-    interaction:
-        | ButtonInteraction
-        | ModalSubmitInteraction
-        | CommandInteraction
-        | UserContextMenuCommandInteraction
-        | MessageContextMenuCommandInteraction,
+    interaction: ButtonInteraction | ModalSubmitInteraction | CommandInteraction | UserContextMenuCommandInteraction | MessageContextMenuCommandInteraction,
     checkManagement: boolean = true,
     checkChannel: boolean = true,
     botPerms?: PermissionResolvable,
@@ -347,9 +319,7 @@ export async function checkTvcArgs(
             await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
             return false;
         }
-        const botPerform =
-            bm.permissions.has(PermissionFlagsBits.Administrator) &&
-            channel.permissionsFor(bm).has(botPerms);
+        const botPerform = bm.permissions.has(PermissionFlagsBits.Administrator) && channel.permissionsFor(bm).has(botPerms);
         if (!botPerform) {
             await bot.tools.discord.tvcError('no-perm-bot', command, bot, localeName, interaction);
             return false;
@@ -361,9 +331,7 @@ export async function checkTvcArgs(
         // Check user's permissions
         const perms = channel.permissionsFor(member);
         const isAdmin = member.permissions.has(PermissionFlagsBits.Administrator);
-        const isManager =
-            perms.has(PermissionFlagsBits.ManageChannels) ||
-            perms.has(PermissionFlagsBits.ManageGuild);
+        const isManager = perms.has(PermissionFlagsBits.ManageChannels) || perms.has(PermissionFlagsBits.ManageGuild);
         const channelOwner = member.id === ownerId;
 
         if (!channelOwner && ownerOnly) {
@@ -380,13 +348,7 @@ export async function checkTvcArgs(
     // Check additional conditions if a target is provided
     if (target && channel) {
         if (target.id === member.id && process.env.NODE_ENV === 'production') {
-            await bot.tools.discord.tvcError(
-                'target-yourself',
-                command,
-                bot,
-                localeName,
-                interaction
-            );
+            await bot.tools.discord.tvcError('target-yourself', command, bot, localeName, interaction);
             return false;
         }
 
@@ -396,8 +358,7 @@ export async function checkTvcArgs(
         }
 
         if (
-            (target.permissions.has(PermissionFlagsBits.Administrator) ||
-                target.permissions.has(PermissionFlagsBits.ManageGuild)) &&
+            (target.permissions.has(PermissionFlagsBits.Administrator) || target.permissions.has(PermissionFlagsBits.ManageGuild)) &&
             process.env.NODE_ENV === 'production'
         ) {
             await bot.tools.discord.tvcError('target-power', command, bot, localeName, interaction);
@@ -405,13 +366,7 @@ export async function checkTvcArgs(
         }
 
         if (target.voice.channel?.id !== channel.id) {
-            await bot.tools.discord.tvcError(
-                'target-outside',
-                command,
-                bot,
-                localeName,
-                interaction
-            );
+            await bot.tools.discord.tvcError('target-outside', command, bot, localeName, interaction);
             return false;
         }
     }
@@ -453,18 +408,10 @@ export async function generateTempVoiceControls(
             currentRow = new ActionRowBuilder();
         }
         const emoji = bot.translations.translateTo(usedLocale, `controls.buttons.${key}.emoji`);
-        currentRow.addComponents(
-            new ButtonBuilder()
-                .setCustomId(`control-${key}`)
-                .setEmoji(emoji)
-                .setStyle(ButtonStyle.Secondary)
-        );
+        currentRow.addComponents(new ButtonBuilder().setCustomId(`control-${key}`).setEmoji(emoji).setStyle(ButtonStyle.Secondary));
 
         buttonFields.push({
-            name: `[ ${emoji} ] - ${bot.translations.translateTo(
-                usedLocale,
-                `controls.buttons.${key}.name`
-            )}`,
+            name: `[ ${emoji} ] - ${bot.translations.translateTo(usedLocale, `controls.buttons.${key}.name`)}`,
             value: bot.translations.translateTo(usedLocale, `controls.buttons.${key}.description`),
             inline: true
         });
@@ -478,13 +425,7 @@ export async function generateTempVoiceControls(
             currentRow = new ActionRowBuilder();
         }
 
-        currentRow.addComponents(
-            new ButtonBuilder()
-                .setLabel(value.name)
-                .setEmoji(value.emoji)
-                .setURL(value.url)
-                .setStyle(ButtonStyle.Link)
-        );
+        currentRow.addComponents(new ButtonBuilder().setLabel(value.name).setEmoji(value.emoji).setURL(value.url).setStyle(ButtonStyle.Link));
     }
 
     // Add the last row if not empty
@@ -505,10 +446,7 @@ export async function generateTempVoiceControls(
                     embeds: [
                         await bot.tools.discord.generateEmbed(bot, {
                             type: 'error',
-                            content: await bot.translations.translateTo(
-                                localeUser,
-                                'controls.error-message'
-                            ),
+                            content: await bot.translations.translateTo(localeUser, 'controls.error-message'),
                             guild: interaction.guild || undefined,
                             user: interaction.user,
                             timestamp: true
@@ -524,10 +462,7 @@ export async function generateTempVoiceControls(
                 embeds: [
                     await bot.tools.discord.generateEmbed(bot, {
                         type: 'success',
-                        content: await bot.translations.translateTo(
-                            localeUser,
-                            'controls.success-message'
-                        ),
+                        content: await bot.translations.translateTo(localeUser, 'controls.success-message'),
                         guild: interaction.guild || undefined,
                         user: interaction.user,
                         timestamp: true

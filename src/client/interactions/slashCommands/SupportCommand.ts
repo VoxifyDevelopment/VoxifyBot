@@ -17,13 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    Locale,
-    SlashCommandBuilder
-} from 'discord.js';
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, Locale, SlashCommandBuilder } from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
 
@@ -31,9 +25,7 @@ export default class PingCommand implements SlashCommandExecutor {
     name = 'support';
 
     data = (bot: VoxifyClient) => {
-        let dataJson = new SlashCommandBuilder()
-            .setName(this.name)
-            .setDescription(bot.translations.translate('commands.support.description'));
+        let dataJson = new SlashCommandBuilder().setName(this.name).setDescription(bot.translations.translate('commands.support.description'));
 
         let names = bot.translations.initializeLocales();
         let descriptions = bot.translations.initializeLocales();
@@ -44,10 +36,7 @@ export default class PingCommand implements SlashCommandExecutor {
 
             let name = bot.translations.translateTo(normalizedLanguage, 'commands.support.name');
             names[normalizedLanguage as Locale] = name;
-            let description = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.support.description'
-            );
+            let description = bot.translations.translateTo(normalizedLanguage, 'commands.support.description');
             descriptions[normalizedLanguage as Locale] = description;
         });
 
@@ -84,33 +73,13 @@ export default class PingCommand implements SlashCommandExecutor {
                     new ActionRowBuilder<ButtonBuilder>().addComponents(
                         new ButtonBuilder()
                             .setURL(bot.translations.translate('commands.support.w-button-url'))
-                            .setEmoji(
-                                bot.translations.translateTo(
-                                    localeName,
-                                    'commands.support.w-button-emoji'
-                                )
-                            )
-                            .setLabel(
-                                bot.translations.translateTo(
-                                    localeName,
-                                    'commands.support.w-button-name'
-                                )
-                            )
+                            .setEmoji(bot.translations.translateTo(localeName, 'commands.support.w-button-emoji'))
+                            .setLabel(bot.translations.translateTo(localeName, 'commands.support.w-button-name'))
                             .setStyle(ButtonStyle.Link),
                         new ButtonBuilder()
                             .setURL(bot.translations.translate('commands.support.s-button-url'))
-                            .setEmoji(
-                                bot.translations.translateTo(
-                                    localeName,
-                                    'commands.support.s-button-emoji'
-                                )
-                            )
-                            .setLabel(
-                                bot.translations.translateTo(
-                                    localeName,
-                                    'commands.support.s-button-name'
-                                )
-                            )
+                            .setEmoji(bot.translations.translateTo(localeName, 'commands.support.s-button-emoji'))
+                            .setLabel(bot.translations.translateTo(localeName, 'commands.support.s-button-name'))
                             .setStyle(ButtonStyle.Link)
                     )
                 ]

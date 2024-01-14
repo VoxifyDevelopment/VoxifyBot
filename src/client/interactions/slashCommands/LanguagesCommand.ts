@@ -25,9 +25,7 @@ export default class PingCommand implements SlashCommandExecutor {
     name = 'languages';
 
     data = (bot: VoxifyClient) => {
-        let dataJson = new SlashCommandBuilder()
-            .setName(this.name)
-            .setDescription(bot.translations.translate('commands.languages.description'));
+        let dataJson = new SlashCommandBuilder().setName(this.name).setDescription(bot.translations.translate('commands.languages.description'));
 
         let names = bot.translations.initializeLocales();
         let descriptions = bot.translations.initializeLocales();
@@ -38,10 +36,7 @@ export default class PingCommand implements SlashCommandExecutor {
 
             let name = bot.translations.translateTo(normalizedLanguage, 'commands.languages.name');
             names[normalizedLanguage as Locale] = name;
-            let description = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.languages.description'
-            );
+            let description = bot.translations.translateTo(normalizedLanguage, 'commands.languages.description');
             descriptions[normalizedLanguage as Locale] = description;
         });
 

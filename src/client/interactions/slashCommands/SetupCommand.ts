@@ -17,13 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ChannelType,
-    CommandInteractionOptionResolver,
-    Locale,
-    PermissionFlagsBits,
-    SlashCommandBuilder
-} from 'discord.js';
+import { ChannelType, CommandInteractionOptionResolver, Locale, PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
 
@@ -31,9 +25,7 @@ export default class PingCommand implements SlashCommandExecutor {
     name = 'setup';
 
     data = (bot: VoxifyClient) => {
-        let dataJson = new SlashCommandBuilder()
-            .setName(this.name)
-            .setDescription(bot.translations.translate('commands.setup.description'));
+        let dataJson = new SlashCommandBuilder().setName(this.name).setDescription(bot.translations.translate('commands.setup.description'));
 
         let names = bot.translations.initializeLocales();
         let descriptions = bot.translations.initializeLocales();
@@ -50,32 +42,17 @@ export default class PingCommand implements SlashCommandExecutor {
 
             let name = bot.translations.translateTo(normalizedLanguage, 'commands.setup.name');
             names[normalizedLanguage as Locale] = name;
-            let description = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.setup.description'
-            );
+            let description = bot.translations.translateTo(normalizedLanguage, 'commands.setup.description');
             descriptions[normalizedLanguage as Locale] = description;
 
-            let optionContainerName = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.setup.options.container.name'
-            );
+            let optionContainerName = bot.translations.translateTo(normalizedLanguage, 'commands.setup.options.container.name');
             optionContainerNames[normalizedLanguage as Locale] = optionContainerName;
-            let optionContainerDescription = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.setup.options.container.description'
-            );
+            let optionContainerDescription = bot.translations.translateTo(normalizedLanguage, 'commands.setup.options.container.description');
             optionContainerDescriptions[normalizedLanguage as Locale] = optionContainerDescription;
 
-            let optionLobbyName = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.setup.options.lobby.name'
-            );
+            let optionLobbyName = bot.translations.translateTo(normalizedLanguage, 'commands.setup.options.lobby.name');
             optionLobbyNames[normalizedLanguage as Locale] = optionLobbyName;
-            let optionLobbyDescription = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.setup.options.lobby.description'
-            );
+            let optionLobbyDescription = bot.translations.translateTo(normalizedLanguage, 'commands.setup.options.lobby.description');
             optionLobbyDescriptions[normalizedLanguage as Locale] = optionLobbyDescription;
         });
 
@@ -89,12 +66,8 @@ export default class PingCommand implements SlashCommandExecutor {
             channelOption.setRequired(true);
             channelOption.addChannelTypes(ChannelType.GuildCategory);
 
-            channelOption.setName(
-                bot.translations.translate('commands.setup.options.container.name')
-            );
-            channelOption.setDescription(
-                bot.translations.translate('commands.setup.options.container.name')
-            );
+            channelOption.setName(bot.translations.translate('commands.setup.options.container.name'));
+            channelOption.setDescription(bot.translations.translate('commands.setup.options.container.name'));
 
             channelOption.setNameLocalizations(optionContainerNames);
             channelOption.setDescriptionLocalizations(optionContainerDescriptions);
@@ -113,9 +86,7 @@ export default class PingCommand implements SlashCommandExecutor {
             return channelOption;
         });
 
-        dataJson
-            .setDMPermission(false)
-            .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
+        dataJson.setDMPermission(false).setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels);
 
         return dataJson.toJSON();
     };
@@ -131,20 +102,12 @@ export default class PingCommand implements SlashCommandExecutor {
             ? interaction.locale.toLowerCase()
             : interaction.guild?.preferredLocale.toLowerCase() || 'en-us';
 
-        if (
-            !guild.members.cache
-                .get(bot.user?.id || '')
-                ?.permissions.has(PermissionFlagsBits.ManageChannels)
-        ) {
+        if (!guild.members.cache.get(bot.user?.id || '')?.permissions.has(PermissionFlagsBits.ManageChannels)) {
             const key = bot.translations.translateTo(localeName, 'commands.setup.name');
             const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-            const content = bot.translations.translateTo(
-                localeName,
-                'commands.setup.result.error',
-                {
-                    error: bot.translations.translateTo(localeName, 'commands.setup.errors.no-perm')
-                }
-            );
+            const content = bot.translations.translateTo(localeName, 'commands.setup.result.error', {
+                error: bot.translations.translateTo(localeName, 'commands.setup.errors.no-perm')
+            });
             interaction
                 .reply({
                     embeds: [
@@ -171,13 +134,9 @@ export default class PingCommand implements SlashCommandExecutor {
 
             const key = bot.translations.translateTo(localeName, 'commands.setup.name');
             const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-            const content = bot.translations.translateTo(
-                localeName,
-                'commands.setup.result.error',
-                {
-                    error: '```\nDatabase performance currently too slow...\n```'
-                }
-            );
+            const content = bot.translations.translateTo(localeName, 'commands.setup.result.error', {
+                error: '```\nDatabase performance currently too slow...\n```'
+            });
             interaction
                 .reply({
                     embeds: [
@@ -202,21 +161,11 @@ export default class PingCommand implements SlashCommandExecutor {
         if (!requestedContainer || !requestedLobby) {
             const key = bot.translations.translateTo(localeName, 'commands.setup.name');
             const feedback = bot.translations.translateTo(localeName, 'feedback.warning');
-            const content = bot.translations.translateTo(
-                localeName,
-                'commands.setup.result.error',
-                {
-                    error: !requestedContainer
-                        ? bot.translations.translateTo(
-                              localeName,
-                              'commands.setup.errors.no-access-container'
-                          )
-                        : bot.translations.translateTo(
-                              localeName,
-                              'commands.setup.errors.no-access-lobby'
-                          )
-                }
-            );
+            const content = bot.translations.translateTo(localeName, 'commands.setup.result.error', {
+                error: !requestedContainer
+                    ? bot.translations.translateTo(localeName, 'commands.setup.errors.no-access-container')
+                    : bot.translations.translateTo(localeName, 'commands.setup.errors.no-access-lobby')
+            });
             interaction
                 .reply({
                     embeds: [

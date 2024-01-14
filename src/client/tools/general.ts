@@ -30,11 +30,7 @@ export function isEmptyString(str: string): boolean {
  * @param {() => void} intervalFunction - The function to be run at each interval.
  * @returns {Promise<boolean>} - A Promise resolving to `true` once the initial interval is set.
  */
-export async function randomInterval(
-    minDelay: number,
-    maxDelay: number,
-    intervalFunction: () => void
-): Promise<boolean> {
+export async function randomInterval(minDelay: number, maxDelay: number, intervalFunction: () => void): Promise<boolean> {
     /**
      * Helper function to generate a random number between two given values.
      * @param {number} min - The minimum value.

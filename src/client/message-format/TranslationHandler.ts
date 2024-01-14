@@ -18,9 +18,7 @@
  */
 
 import { Locale } from 'discord.js';
-import MessagePlaceholderHandler, {
-    MessagePlaceholderHandlerOptions
-} from './MessagePlaceholderHandler';
+import MessagePlaceholderHandler, { MessagePlaceholderHandlerOptions } from './MessagePlaceholderHandler';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -222,20 +220,15 @@ export default class TranslationHandler {
 
             if (translation !== undefined) {
                 // Attempt to resolve nested keys (e.g., en-GB.name)
-                const resolvedTranslation: string = translation
-                    .split('.')
-                    .reduce<string>((obj, part) => {
-                        if (obj && typeof obj === 'object' && part in obj) {
-                            return obj[part] as unknown as string;
-                        } else {
-                            return '';
-                        }
-                    }, key);
+                const resolvedTranslation: string = translation.split('.').reduce<string>((obj, part) => {
+                    if (obj && typeof obj === 'object' && part in obj) {
+                        return obj[part] as unknown as string;
+                    } else {
+                        return '';
+                    }
+                }, key);
 
-                return this.placeholderHandler.fastFormat(
-                    resolvedTranslation || translation,
-                    replace
-                );
+                return this.placeholderHandler.fastFormat(resolvedTranslation || translation, replace);
             }
         }
 
@@ -294,11 +287,7 @@ export default class TranslationHandler {
      * @param {object} target - The target object to store flattened translations.
      * @param {string} prefix - The prefix to be added to each flattened translation key.
      */
-    flattenTranslations(
-        source: { [key: string]: any },
-        target: { [key: string]: string },
-        prefix: string = ''
-    ): void {
+    flattenTranslations(source: { [key: string]: any }, target: { [key: string]: string }, prefix: string = ''): void {
         Object.entries(source).forEach(([key, value]) => {
             const fullKey: string = prefix ? `${prefix}.${key}` : key;
 

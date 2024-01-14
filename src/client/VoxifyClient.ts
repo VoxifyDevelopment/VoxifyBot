@@ -62,17 +62,11 @@ export default class VoxifyClient extends Client {
     buttonCommandInteractionsPremium: Collection<string, ButtonCommandExecutor> = new Collection();
     autocompleteInteractionsPremium: Collection<string, any> = new Collection();
     userContextInteractionsPremium: Collection<string, UserContextMenuExecutor> = new Collection();
-    messageContextInteractionsPremium: Collection<string, MessageContextMenuExecutor> =
-        new Collection();
+    messageContextInteractionsPremium: Collection<string, MessageContextMenuExecutor> = new Collection();
 
     constructor(cache: Cache, shardId?: number) {
         super({
-            intents: [
-                GatewayIntentBits.Guilds,
-                GatewayIntentBits.GuildMembers,
-                GatewayIntentBits.GuildVoiceStates,
-                GatewayIntentBits.GuildPresences
-            ],
+            intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildPresences],
             partials: [Partials.GuildMember, Partials.User]
         });
         this.out = new Logger('VoxifyBot', shardId !== undefined ? `[Shard: ${shardId || 0}]` : '');
@@ -88,10 +82,7 @@ export default class VoxifyClient extends Client {
         Object.keys(this.translations.translations).forEach((langName) => {
             let trans = this.translations.translations[langName];
             this.out.debug(
-                `Language loaded: ${this.translations.translateTo(
-                    langName,
-                    'lang.key'
-                )} | ${this.translations.translateTo(
+                `Language loaded: ${this.translations.translateTo(langName, 'lang.key')} | ${this.translations.translateTo(
                     langName,
                     'lang.name'
                 )} | ${this.translations.translateTo(langName, 'lang.named')}`

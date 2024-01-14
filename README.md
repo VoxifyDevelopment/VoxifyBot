@@ -28,8 +28,7 @@
 
 ---
 
-Elevate Discord voice channels with seamless management, multilingual support, and blazing speed for
-an unparalleled user experience.
+Elevate Discord voice channels with seamless management, multilingual support, and blazing speed for an unparalleled user experience.
 
 ---
 
@@ -39,8 +38,7 @@ an unparalleled user experience.
 
 ### Clone Repository
 
-> git clone
-> [https://github.com/VoxifyDevelopment/VoxifyBot](https://github.com/VoxifyDevelopment/VoxifyBot)
+> git clone [https://github.com/VoxifyDevelopment/VoxifyBot](https://github.com/VoxifyDevelopment/VoxifyBot)
 
 ### Download and/or update the submodules
 

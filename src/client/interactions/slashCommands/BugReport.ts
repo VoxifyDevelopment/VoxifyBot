@@ -17,15 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-    ActionRowBuilder,
-    Locale,
-    ModalBuilder,
-    SlashCommandBuilder,
-    TextChannel,
-    TextInputBuilder,
-    TextInputStyle
-} from 'discord.js';
+import { ActionRowBuilder, Locale, ModalBuilder, SlashCommandBuilder, TextChannel, TextInputBuilder, TextInputStyle } from 'discord.js';
 import SlashCommandExecutor, { SlashCommandEvent } from '../../executors/SlashCommandExecutor';
 import VoxifyClient from '../../VoxifyClient';
 import { channel } from 'diagnostics_channel';
@@ -48,10 +40,7 @@ export default class PingCommand implements SlashCommandExecutor {
 
             let name = bot.translations.translateTo(normalizedLanguage, 'commands.bug-report.name');
             names[normalizedLanguage as Locale] = name;
-            let description = bot.translations.translateTo(
-                normalizedLanguage,
-                'commands.bug-report.description'
-            );
+            let description = bot.translations.translateTo(normalizedLanguage, 'commands.bug-report.description');
             descriptions[normalizedLanguage as Locale] = description;
         });
 
@@ -81,14 +70,10 @@ export default class PingCommand implements SlashCommandExecutor {
 
                 try {
                     let reportChannel =
-                        bot.channels.cache.get(process.env.BUGS || '') ||
-                        (await bot.channels.fetch(process.env.BUGS || '').catch(console.error));
+                        bot.channels.cache.get(process.env.BUGS || '') || (await bot.channels.fetch(process.env.BUGS || '').catch(console.error));
 
                     if (!reportChannel) {
-                        const errorContent = bot.translations.translateTo(
-                            localeName,
-                            'commands.bug-report.error'
-                        );
+                        const errorContent = bot.translations.translateTo(localeName, 'commands.bug-report.error');
                         const feedback = bot.translations.translateTo(localeName, 'feedback.error');
                         modalInteraction
                             .reply({
@@ -110,20 +95,13 @@ export default class PingCommand implements SlashCommandExecutor {
 
                     reportChannel = reportChannel as TextChannel;
 
-                    const field = modalInteraction.fields.fields.find(
-                        (f) => f.customId === 'bug-report-topic'
-                    );
+                    const field = modalInteraction.fields.fields.find((f) => f.customId === 'bug-report-topic');
                     const topic: string = field?.value || 'No topic provided';
-                    const field2 = modalInteraction.fields.fields.find(
-                        (f) => f.customId === 'bug-report-description'
-                    );
+                    const field2 = modalInteraction.fields.fields.find((f) => f.customId === 'bug-report-description');
                     const description: string = field2?.value || 'No description provided';
 
                     const feedback = bot.translations.translateTo(localeName, 'feedback.success');
-                    const content = bot.translations.translateTo(
-                        localeName,
-                        'commands.bug-report.success'
-                    );
+                    const content = bot.translations.translateTo(localeName, 'commands.bug-report.success');
 
                     modalInteraction
                         .reply({
@@ -167,9 +145,7 @@ export default class PingCommand implements SlashCommandExecutor {
         interaction
             .showModal(
                 new ModalBuilder()
-                    .setTitle(
-                        bot.translations.translateTo(localeName, 'commands.bug-report.modal-title')
-                    )
+                    .setTitle(bot.translations.translateTo(localeName, 'commands.bug-report.modal-title'))
                     .setCustomId('bug-report-' + interaction.member?.user.id)
                     .addComponents(
                         new ActionRowBuilder<TextInputBuilder>().addComponents(
@@ -178,18 +154,8 @@ export default class PingCommand implements SlashCommandExecutor {
                                 .setMaxLength(512)
                                 .setCustomId('bug-report-description----topic')
                                 .setStyle(TextInputStyle.Paragraph)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.attention'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.attention'
-                                    )
-                                ).setValue(`DO NO USE THIS!!! Please read.
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'commands.bug-report.attention'))
+                                .setLabel(bot.translations.translateTo(localeName, 'commands.bug-report.attention')).setValue(`DO NO USE THIS!!! Please read.
 ${bot.translations.translateTo(localeName, 'commands.bug-report.description')}
 ${bot.translations.translateTo(localeName, 'commands.bug-report.description-2')}`)
                         ),
@@ -199,18 +165,8 @@ ${bot.translations.translateTo(localeName, 'commands.bug-report.description-2')}
                                 .setMaxLength(64)
                                 .setCustomId('bug-report-topic')
                                 .setStyle(TextInputStyle.Short)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.modal-topic'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.modal-top'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'commands.bug-report.modal-topic'))
+                                .setLabel(bot.translations.translateTo(localeName, 'commands.bug-report.modal-top'))
                         ),
                         new ActionRowBuilder<TextInputBuilder>().addComponents(
                             new TextInputBuilder()
@@ -218,18 +174,8 @@ ${bot.translations.translateTo(localeName, 'commands.bug-report.description-2')}
                                 .setMaxLength(3969)
                                 .setCustomId('bug-report-description')
                                 .setStyle(TextInputStyle.Paragraph)
-                                .setPlaceholder(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.modal-description'
-                                    )
-                                )
-                                .setLabel(
-                                    bot.translations.translateTo(
-                                        localeName,
-                                        'commands.bug-report.modal-desc'
-                                    )
-                                )
+                                .setPlaceholder(bot.translations.translateTo(localeName, 'commands.bug-report.modal-description'))
+                                .setLabel(bot.translations.translateTo(localeName, 'commands.bug-report.modal-desc'))
                         )
                     )
             )
