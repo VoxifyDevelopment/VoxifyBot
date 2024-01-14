@@ -22,6 +22,10 @@
         "prettier": "npx prettier --write .",
         "licenseCheck": "license-check-and-add check -f ./licenseConfig.json",
         "licenseFormat": "license-check-and-add add -f ./licenseConfig.json",
+        "stats:write": "node statistics.js --write",
+        "stats:print": "node statistics.js",
+        "stats:write:print": "node statistics.js --write --print",
+        "stats": "npm run stats:print",
         "test": "echo \"Error: no test specified\" && exit 0"
     },
     "repository": {
@@ -47,16 +51,16 @@
         "axios": "^1.6.5",
         "discord.js": "^14.14.1",
         "dotenv": "^16.3.1",
-        "install": "^0.13.0",
-        "npm": "^10.3.0",
         "redis": "^4.6.12",
         "topgg-autoposter": "^2.0.1"
     },
     "devDependencies": {
         "@types/node": "^20.10.7",
+        "chalk": "^4.1.2",
         "find": "^0.3.0",
         "jsonminify": "^0.4.2",
         "license-check-and-add": "^4.0.5",
+        "micromatch": "^4.0.5",
         "prettier": "^3.1.1",
         "terser": "^5.26.0",
         "ts-node": "^10.9.2",
