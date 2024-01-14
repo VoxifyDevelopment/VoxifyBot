@@ -21,6 +21,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const micromatch = require('micromatch');
 const chalk = require('chalk');
+const prettier = require('prettier');
 
 async function getCodeStatistics(rootDir, ignoreFile) {
     const stats = {};
@@ -97,7 +98,7 @@ async function getCodeStatistics(rootDir, ignoreFile) {
     return stats;
 }
 
-function displayStatistics(statistics) {
+async function displayStatistics(statistics) {
     console.log(chalk.bold.underline('Code Statistics:'));
     console.log(chalk.gray('----------------------------------'));
 
@@ -147,7 +148,7 @@ function displayStatistics(statistics) {
     return statistics;
 }
 
-function writeStatisticsTxt(statistics) {
+async function writeStatisticsTxt(statistics) {
     const lines = [];
 
     lines.push('Code Statistics:');
@@ -193,7 +194,7 @@ function writeStatisticsTxt(statistics) {
     return true;
 }
 
-function writeStatisticsMd(statistics) {
+async function writeStatisticsMd(statistics) {
     const lines = [];
 
     lines.push('# Code Statistics');
@@ -232,7 +233,21 @@ function writeStatisticsMd(statistics) {
 
     lines.push('\n---\n');
 
-    fs.writeFile('./statistics.md', lines.join('\n'), 'utf-8');
+    const output = lines.join('\n');
+
+    const formattedContent = await prettier.format(output, {
+        parser: 'markdown',
+        printWidth: 160,
+        tabWidth: 2,
+        useTabs: false,
+        bracketSpacing: true,
+        quoteProps: 'as-needed',
+        proseWrap: 'always',
+        htmlWhitespaceSensitivity: 'css',
+        endOfLine: 'lf'
+    });
+
+    fs.writeFile('./statistics.md', formattedContent, 'utf-8');
 
     return true;
 }
