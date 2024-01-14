@@ -17,6 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import timeCtx from '../../i18n/en-US/time.json';
+import VoxifyClient from '../VoxifyClient';
+
 export default () => {};
 
 export function isEmptyString(str: string): boolean {
@@ -249,6 +252,51 @@ export function msToTimeString(
     //     timeUnits.push(timePad(remainingMilliseconds, 'milliseconds'));
     //     count--;
     // }
+
+    return timeUnits;
+}
+
+export type TimeUnits = {
+    [key: string]: {
+        singular: string;
+        plural: string;
+        conversionFactor: number;
+    };
+};
+
+/**
+ * Converts milliseconds to a human-readable time string array, considering years, months, weeks, days, hours, minutes, seconds, and optionally milliseconds.
+ * Stops producing output after a certain count.
+ *
+ * @param milliseconds - The number of milliseconds to convert.
+ * @param bot - The VoxifyClient instance for translation.
+ * @param locale - A string with a BCP 47 language tag, e.g., 'en-US'.
+ * @param count - The count to limit the output (default is Infinity, i.e., no limit).
+ * @param includeMilliseconds - Whether to include milliseconds in the output (default is false).
+ * @returns An array representing the time in years, months, weeks, days, hours, minutes, seconds, and optionally milliseconds, with translations and counts.
+ */
+export function msToTimeStrings(
+    milliseconds: number,
+    bot: VoxifyClient,
+    locale: string = 'en-us',
+    count: number = Infinity,
+    includeMilliseconds: boolean = false
+): string[] {
+    const units: TimeUnits = timeCtx.unit;
+    let remainingMilliseconds = milliseconds;
+    const timeUnits: string[] = [];
+
+    for (const unitKey of Object.keys(units).reverse()) {
+        if (remainingMilliseconds < 1) continue;
+        const unit = units[unitKey];
+        const value = Math.floor(remainingMilliseconds / unit.conversionFactor);
+        remainingMilliseconds %= unit.conversionFactor;
+        if (count > 0 && value > 0 && !(unitKey === 'millisecond' && !includeMilliseconds)) {
+            const translationKey = `time.unit.${unitKey}.${value === 1 ? 'singular' : 'plural'}`;
+            timeUnits.push(`${timePad(value)} ${bot.translations.translateTo(locale, translationKey)}`);
+            count--;
+        }
+    }
 
     return timeUnits;
 }
