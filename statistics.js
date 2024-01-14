@@ -124,20 +124,18 @@ function displayStatistics(statistics) {
         const { count, codeStats } = statistics[ext];
         const percentage = ((count / totalStats.count) * 100).toFixed(2);
 
-        console.log(`${chalk.cyan(ext)}: ${chalk.yellow(count)} files (${chalk.green(percentage)}%)`);
+        console.log(`${chalk.cyan(ext)}: ${chalk.yellow(count)} files (${chalk.green(percentage)})`);
         console.log(`    - ${chalk.blue('Total Lines')}: ${codeStats.totalLines}`);
         console.log(
-            `    - ${chalk.blue('Code Lines')}: ${codeStats.codeLines} | (${chalk.green(formatPercentage(codeStats.codeLines, codeStats.totalLines))}%)`
+            `    - ${chalk.blue('Code Lines')}: ${codeStats.codeLines} | (${chalk.green(formatPercentage(codeStats.codeLines, codeStats.totalLines))})`
         );
         console.log(
-            `    - ${chalk.blue('Comment Lines')}: ${codeStats.commentLines} | (${chalk.green(
-                formatPercentage(codeStats.commentLines, codeStats.totalLines)
-            )}%)`
+            `    - ${chalk.blue('Comment Lines')}: ${codeStats.commentLines} | (${chalk.green(formatPercentage(codeStats.commentLines, codeStats.totalLines))})`
         );
         console.log(
             `    - ${chalk.blue('Whitespace Lines')}: ${codeStats.whitespaceLines} | (${chalk.green(
                 formatPercentage(codeStats.whitespaceLines, codeStats.totalLines)
-            )}%)`
+            )})`
         );
     }
 
@@ -178,11 +176,11 @@ function writeStatisticsTxt(statistics) {
         const { count, codeStats } = statistics[ext];
         const percentage = ((count / totalStats.count) * 100).toFixed(2);
 
-        lines.push(`${ext}: ${count} files (${percentage}%)`);
+        lines.push(`${ext}: ${count} files (${percentage})`);
         lines.push(`    - Total Lines: ${codeStats.totalLines}`);
-        lines.push(`    - Code Lines: ${codeStats.codeLines} | (${formatPercentage(codeStats.codeLines, codeStats.totalLines)}%)`);
-        lines.push(`    - Comment Lines: ${codeStats.commentLines} | (${formatPercentage(codeStats.commentLines, codeStats.totalLines)}%)`);
-        lines.push(`    - Whitespace Lines: ${codeStats.whitespaceLines} | (${formatPercentage(codeStats.whitespaceLines, codeStats.totalLines)}%)`);
+        lines.push(`    - Code Lines: ${codeStats.codeLines} | (${formatPercentage(codeStats.codeLines, codeStats.totalLines)})`);
+        lines.push(`    - Comment Lines: ${codeStats.commentLines} | (${formatPercentage(codeStats.commentLines, codeStats.totalLines)})`);
+        lines.push(`    - Whitespace Lines: ${codeStats.whitespaceLines} | (${formatPercentage(codeStats.whitespaceLines, codeStats.totalLines)})`);
     }
 
     lines.push('----------------------------------');
@@ -232,7 +230,7 @@ function writeStatisticsMd(statistics) {
         `| **Total** | **${totalStats.count}** | **${totalStats.codeStats.totalLines}** | **${totalStats.codeStats.codeLines}** | **${totalStats.codeStats.commentLines}** | **${totalStats.codeStats.whitespaceLines}** |`
     );
 
-    lines.push('\n---');
+    lines.push('\n---\n');
 
     fs.writeFile('./statistics.md', lines.join('\n'), 'utf-8');
 
