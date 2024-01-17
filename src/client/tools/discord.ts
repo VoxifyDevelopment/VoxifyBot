@@ -80,28 +80,28 @@ export function resolveActivityType(typeString: string | undefined): ActivityTyp
  * Gets a random status name for the bot.
  *
  * @param {VoxifyClient} bot - The Discord bot client.
- * @returns {string} - A random status name.
+ * @returns {Promise<string>} - A promise with a random status name.
  */
-export function getRandomStatusName(bot: VoxifyClient): string {
+export async function getRandomStatusName(bot: VoxifyClient): Promise<string> {
     let newStatus = statusCtx.names[Math.floor(Math.random() * statusCtx.names.length)];
     while (newStatus === bot.user?.presence?.activities[0]?.name) {
         newStatus = statusCtx.names[Math.floor(Math.random() * statusCtx.names.length)];
     }
-    return newStatus;
+    return newStatus.replace('${serverCount}', (await bot.cache.redis.get('bot.serverCount').catch(console.error)) || '1');
 }
 
 /**
  * Gets a random status state for the bot.
  *
  * @param {VoxifyClient} bot - The Discord bot client.
- * @returns {string} - A random status state.
+ * @returns {Promise<string>} - A promise with a random status state.
  */
-export function getRandomStatusState(bot: VoxifyClient): string {
-    let newStatus = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
-    while (newStatus === bot.user?.presence?.activities[0]?.name) {
-        newStatus = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
+export async function getRandomStatusState(bot: VoxifyClient): Promise<string> {
+    let newState = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
+    while (newState === bot.user?.presence?.activities[0]?.name) {
+        newState = statusCtx.states[Math.floor(Math.random() * statusCtx.states.length)];
     }
-    return newStatus;
+    return newState;
 }
 
 /**
@@ -118,8 +118,8 @@ export async function updateStatus(bot: VoxifyClient): Promise<void> {
     });
 
     bot.user?.setActivity({
-        name: getRandomStatusName(bot),
-        state: getRandomStatusState(bot),
+        name: await getRandomStatusName(bot),
+        state: await getRandomStatusState(bot),
         type: ActivityType.Playing,
         shardId: bot.shardId
     });

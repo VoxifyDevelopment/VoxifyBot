@@ -74,6 +74,17 @@ export default class EventManager {
             this.bot.out.debug(`Shard: ${this.bot.shardId} Registered ${bot.slashCommandInteractions.size} (/) commands.`);
 
             this.bot.cache.redis.set(`${this.bot.cachePrefix}.lastRestarted`, Date.now()).catch(() => {});
+            try {
+                const serverCounts = await Promise.resolve(this.bot.shard?.fetchClientValues('guilds.cache.size').catch(() => []));
+                const totalServers = serverCounts?.reduce((prev, val) => (typeof prev === 'number' ? prev + (val as number) : (val as number)), 0);
+                const safeTotalServers = totalServers ?? 0;
+
+                await this.bot.cache.redis.set(`bot.serverCount`, safeTotalServers as number).catch(() => {});
+                this.bot.out.info(`Total server count: ${totalServers}`);
+            } catch (error) {
+                console.error(`Error fetching server count: ${error}`);
+            }
+
             this.bot.out.info(`Shard ${shardId} is ready!`);
         });
 
@@ -100,12 +111,48 @@ export default class EventManager {
             }
         });
 
+        // this.bot.on('guildCreate', async (guild) => {
+        //     this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Created in: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
+        // });
+
+        // this.bot.on('guildDelete', async (guild) => {
+        //     this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
+        // });
+
         this.bot.on('guildCreate', async (guild) => {
-            this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Created in: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
+            try {
+                // Your existing debug log
+                this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Created in: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
+
+                // Update the Redis value with the new total server count
+                const serverCounts = await this.bot.shard?.fetchClientValues('guilds.cache.size').catch(() => []);
+                const totalServers = serverCounts?.reduce((prev, val) => (typeof prev === 'number' ? prev + (val as number) : (val as number)), 0);
+                const safeTotalServers = totalServers ?? 0;
+
+                await this.bot.cache.redis.set(`bot.serverCount`, safeTotalServers as number).catch(() => {});
+                this.bot.out.info(`Updated total server count in Redis: ${safeTotalServers}`);
+            } catch (error) {
+                console.error(`Error handling guildCreate event: ${error}`);
+            }
         });
 
         this.bot.on('guildDelete', async (guild) => {
-            this.bot.out.debug(`Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`);
+            try {
+                // Your existing debug log
+                this.bot.out.debug(
+                    `Shard: ${this.bot.shardId} | GShard: ${guild.shardId} Removed from: ${guild.id} [${guild.name}] | ${guild.preferredLocale}`
+                );
+
+                // Update the Redis value with the new total server count
+                const serverCounts = await this.bot.shard?.fetchClientValues('guilds.cache.size').catch(() => []);
+                const totalServers = serverCounts?.reduce((prev, val) => (typeof prev === 'number' ? prev + (val as number) : (val as number)), 0);
+                const safeTotalServers = totalServers ?? 0;
+
+                await this.bot.cache.redis.set(`bot.serverCount`, safeTotalServers as number).catch(() => {});
+                this.bot.out.info(`Updated total server count in Redis: ${safeTotalServers}`);
+            } catch (error) {
+                console.error(`Error handling guildDelete event: ${error}`);
+            }
         });
     }
 }
